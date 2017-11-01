@@ -1,15 +1,33 @@
 <htm>
-<head>
-<script src="./src.js"></script>
-</head>
-<body>
-<h1>Javascript小物ツール置き場</h1>
-<h2>JSONマージ</h2>
-<p>
-  複数のJSONをアップロードすると一つのJSONにまとめます。<br>
-  一つのリストに格納されます。
-</p>
-<div id="drop_zone" style="color:#ff0000;background-color:#FFFF00;width:400px;height:100px;border:1px dotted">ここに全ファイルファイルドロップ</div>
-<textarea id="list" style="width:400px;height:200px;"></textarea>
-</body>
+    <head>
+        <script src="./lib/jsonpath.js"></script>
+        <script src="./src.js"></script>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <h1>Javascript小物ツール置き場</h1>
+        <p>ブラウザの機能を使ってサクッと作れるツールを置いてます。</p>
+        <div id="json-area">
+            <div id="json-header">
+                <div class="json-header-item">
+                            <h2>JSON解析</h2>
+                </div>
+                <div class="json-header-item">
+                    <p>左記のテキストエリアのJSONをJSONPathで解析します。</p>
+                    <input type="textarea" id="query" class="half-w" value="" placeholder="JSONPath クエリ">
+                    <input type="checkbox" id="distinct"><label for="distinct">Distinct</label>
+                </div>
+            </div>
+            <div id="json-body">
+                <div class="json-body-item">
+                    <textarea id="read-json" class="full-w" placeholder="ここにJSONファイルをドロップすると読み込まれます。
+複数ドロップするとリストにまとめられます。"></textarea>
+                </div>
+                <div class="json-body-item">
+                    <textarea id="result" class="full-w" placeholder="解析結果
+                    "></textarea>
+                </div>
+            </div>
+        </div>
+    </body>
 </html>

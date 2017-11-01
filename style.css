@@ -1,0 +1,42 @@
+/* CSS */
+#read-json {
+    background-color: #FFFF00;
+    height: 200px;
+}
+
+#result {
+    height: 200px;
+}
+
+#json-area {
+    display: flex;
+    flex-direction: column;
+    width:100%;
+}
+#json-header {
+    display: flex;
+    flex-direction: row;
+    width:100%;
+}
+
+.json-header-item {
+    width: 50%;
+}
+
+#json-body {
+    display: flex;
+    flex-direction: row;
+    width:100%;
+}
+
+.json-body-item {
+    width: 50%;
+}
+
+.full-w {
+    width:100%;
+}
+
+.half-w {
+    width:50%;
+}
