@@ -1,36 +1,37 @@
 /* CSS */
-#read-json {
-    background-color: #FFFF00;
-    height: 200px;
-}
 
-#result {
-    height: 200px;
-}
-
-#json-area {
+#jpath  {
     display: flex;
     flex-direction: column;
     width: 100%;
 }
 
-#json-header {
+#jpath .src {
+    background-color: #FFFF00;
+    height: 200px;
+}
+
+#jpath .result {
+    height: 200px;
+}
+
+#jpath .header {
     display: flex;
     flex-direction: row;
     width: 100%;
 }
 
-.json-header-item {
+#jpath .header-item {
     width: 50%;
 }
 
-#json-body {
+#jpath .body {
     display: flex;
     flex-direction: row;
     width: 100%;
 }
 
-.json-body-item {
+#jpath .body-item {
     width: 50%;
 }
 
@@ -42,7 +43,7 @@
     width: 50%;
 }
 
-#error {
+#jpath .error {
     color: #ff0000;
     word-wrap: break-word;
 }

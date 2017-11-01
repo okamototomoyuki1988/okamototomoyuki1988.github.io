@@ -1,4 +1,4 @@
-<htm>
+<html>
     <head>
         <script src="./lib/jsonpath.js"></script>
         <script src="./src.js"></script>
@@ -10,26 +10,26 @@
             ブラウザの機能を使ってサクッと作れるツールを置いてます。<br>
             <b>※Chrome 推奨、Firefoxならおそらく動く、IE11だと動きません</b>
         </p>
-        <div id="json-area">
-            <div id="json-header">
-                <div class="json-header-item">
-                    <h2>JSON解析　<span id="json-usage" style="display:none;">&#x2754;</span></h2>
-                    <p id="error"></p>
+        <div id="jpath">
+            <div class="header">
+                <div class="header-item">
+                    <h2>JSON解析　<span class="usage" style="display:none;">&#x2754;</span></h2>
+                    <p class="error"></p>
                 </div>
-                <div class="json-header-item">
+                <div class="header-item">
                     <p>左記のテキストエリアのJSONを<a href="https://github.com/json-path/JsonPath" target="_blank">JSONPath</a>で解析します。</p>
-                    <input type="textarea" id="query" class="half-w" value="" placeholder="JSONPath クエリ">
-                    <input type="checkbox" id="distinct">
+                    <input type="textarea" class="query" class="half-w" value="" placeholder="JSONPath クエリ">
+                    <input type="checkbox" class="distinct">
                     <label for="distinct">Distinct</label>
                 </div>
             </div>
-            <div id="json-body">
-                <div class="json-body-item">
-                    <textarea id="read-json" class="full-w" placeholder="ここにJSONファイルをドロップすると読み込まれます。
+            <div class="body">
+                <div class="body-item">
+                    <textarea class="src full-w" placeholder="ここにJSONファイルをドロップすると読み込まれます。
 複数ドロップするとリストにまとめられます。"></textarea>
                 </div>
-                <div class="json-body-item">
-                    <textarea id="result" class="full-w" placeholder="解析結果
+                <div class="body-item">
+                    <textarea class="result full-w" placeholder="解析結果
                     "></textarea>
                 </div>
             </div>

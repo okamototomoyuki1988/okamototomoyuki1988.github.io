@@ -1,142 +1,148 @@
-// クエリショートカット
-const $ = (query)=>document.querySelector(query);
-const $$ = (query)=>document.querySelectorAll(query);
-
 // ファイルリストに拡張メソッド
 FileList.prototype.map = function() {
     return Array.prototype.map.call(this, ...arguments);
 }
 
 window.onload = ()=>{
-    // JSONマージ
+    // JSONPath
     {
-        const handleFileSelect = (evt)=>{
-            evt.stopPropagation();
-            evt.preventDefault();
+        // クエリショートカット
+        let $ = (query) => document.querySelector("#jpath").querySelector(query);
+        let $$ = (query) => document.querySelector("#jpath").querySelectorAll(query);
 
-            // ファイル情報取得
-            let files = evt.dataTransfer.files;
+        // ファイル読み込み
+        {
+            const handleFileSelect = (evt)=>{
+                evt.stopPropagation();
+                evt.preventDefault();
 
-            // ファイル非同期読み込み
-            let objs = [];
-            let errors = [];
-            const readFileAsync = (f)=>{
-                return new Promise((resolve)=>{
-                    let reader = new FileReader();
-                    reader.readAsText(f);
-                    reader.onload = (content)=>{
-                        let result = content.target.result;
-                        // JSONか
-                        let obj = null;
-                        try {
-                            obj = JSON.parse(result);
-                        } catch (e) {
-                            errors.push(f.name);
+                // ファイル情報取得
+                let files = evt.dataTransfer.files;
+
+                // ファイル非同期読み込み
+                let objs = [];
+                let errors = [];
+                const readFileAsync = (f)=>{
+                    return new Promise((resolve)=>{
+                        let reader = new FileReader();
+                        reader.readAsText(f);
+                        reader.onload = (content)=>{
+                            let result = content.target.result;
+                            // JSONか
+                            let obj = null;
+                            try {
+                                obj = JSON.parse(result);
+                            } catch (e) {
+                                errors.push(f.name);
+                            }
+                            if (obj != null) {
+                                objs = [...objs, obj];
+                            }
+                            resolve();
                         }
-                        if (obj != null) {
-                            objs = [...objs, obj];
-                        }
-                        resolve();
                     }
+                    );
+                }
+
+                Promise.all(files.map((f)=>readFileAsync(f))).then(()=>{
+                    if (objs.length > 1) {
+                        // 複数ならリストにまとめる
+                        $(".src").value = JSON.stringify(objs, null, 2);
+                    } else {
+                        // 一つならそのまま
+                        $(".src").value = JSON.stringify(objs[0], null, 2);
+                    }
+
+                    // エラー表示
+                    if (errors.length > 0) {
+                        $(".error").innerHTML = "下記はフォーマットが不正なためスキップしました。<br>" + errors.join(",");
+                    } else {
+                        // エラー無し
+                        $(".error").innerHTML = "";
+                    }
+
                 }
                 );
             }
 
-            Promise.all(files.map((f)=>readFileAsync(f))).then(()=>{
-                if (objs.length > 1) {
-                    // 複数ならリストにまとめる
-                    $("#read-json").value = JSON.stringify(objs, null, 2);
-                } else {
-                    // 一つならそのまま
-                    $("#read-json").value = JSON.stringify(objs[0], null, 2);
-                }
-
-                // エラー表示
-                if (errors.length > 0) {
-                    $("#error").innerHTML = "下記はフォーマットが不正なためスキップしました。<br>" + errors.join(",");
-                } else {
-                    // エラー無し
-                    $("#error").innerHTML = "";
-                }
-
+            const handleDragOver = (evt)=>{
+                evt.stopPropagation();
+                evt.preventDefault();
+                evt.dataTransfer.dropEffect = 'copy';
             }
-            );
+
+            // Setup the dnd listeners.
+            const dropZone = $(".src");
+            dropZone.addEventListener('dragover', handleDragOver, false);
+            dropZone.addEventListener('drop', handleFileSelect, false);
         }
 
-        const handleDragOver = (evt)=>{
-            evt.stopPropagation();
-            evt.preventDefault();
-            evt.dataTransfer.dropEffect = 'copy';
-        }
+        // JSONPath
+        {
+            let start = null;
+            let step = (timestamp)=>{
+                if (!start)
+                    start = timestamp;
+                var delta = timestamp - start;
+                if (delta > 1500) {
+                    start = null;
+                    // 3秒ごとにクエリ実行
 
-        // Setup the dnd listeners.
-        const dropZone = $('#read-json');
-        dropZone.addEventListener('dragover', handleDragOver, false);
-        dropZone.addEventListener('drop', handleFileSelect, false);
-    }
+                    let resultText = null;
+                    let obj = null;
 
-    // JSONPath
-    {
-        let start = null;
-        let step = (timestamp)=>{
-            if (!start)
-                start = timestamp;
-            var delta = timestamp - start;
-            if (delta > 1500) {
-                start = null;
-                // 3秒ごとにクエリ実行
-
-                let resultText = null;
-                let obj = null;
-
-                let src = $("#read-json").value;
-                if (src != "") {
-                    try {
-                        obj = JSON.parse($("#read-json").value);
-                    } catch (e) {
-                        resultText = "JSONが不正です"
+                    let src = $(".src").value;
+                    if (src != "") {
+                        try {
+                            obj = JSON.parse($(".src").value);
+                        } catch (e) {
+                            resultText = "JSONが不正です"
+                        }
+                    } else {
+                        resultText = "";
                     }
-                } else {
-                    resultText = "";
-                }
 
-                if (obj != null) {
-                    let queryResult = null;
-                    try {
-                        queryResult = JSONPath({
-                            json: obj,
-                            path: $("#query").value
-                        });
-                    } catch (e) {}
+                    if (obj != null) {
+                        let queryResult = null;
+                        try {
+                            queryResult = JSONPath({
+                                json: obj,
+                                path: $(".query").value
+                            });
+                        } catch (e) {}
 
-                    if (queryResult != null && $("#distinct").checked) {
-                        // 重複削除
-                        let distinctList = [];
-                        for (let i = 0; i < queryResult.length; i++) {
-                            let ele1 = queryResult[i];
-                            for (let j = i + 1; j < queryResult.length; j++) {
-                                let ele2 = queryResult[j];
-                                if (JSON.stringify(ele1) === JSON.stringify(ele2)) {
-                                    ele1 = undefined;
-                                    break;
+                        if (queryResult != null && $(".distinct").checked) {
+                            // 重複削除
+                            let distinctList = [];
+                            for (let i = 0; i < queryResult.length; i++) {
+                                let ele1 = queryResult[i];
+                                for (let j = i + 1; j < queryResult.length; j++) {
+                                    let ele2 = queryResult[j];
+                                    if (JSON.stringify(ele1) === JSON.stringify(ele2)) {
+                                        ele1 = undefined;
+                                        break;
+                                    }
+                                }
+
+                                if (ele1 !== undefined) {
+                                    distinctList.push(ele1);
                                 }
                             }
+                            // ソート
+                            distinctList.sort();
 
-                            if (ele1 !== undefined) {
-                                distinctList.push(ele1);
-                            }
+                            queryResult = distinctList;
                         }
-                        queryResult = distinctList;
+
+                        resultText = JSON.stringify(queryResult, null, 2);
                     }
-
-                    resultText = JSON.stringify(queryResult, null, 2);
+                    // 結果表示
+                    $(".result").value = resultText;
                 }
-                // 結果表示
-                $("#result").value = resultText;
-            }
 
+                window.requestAnimationFrame(step);
+            }
             window.requestAnimationFrame(step);
         }
-        window.requestAnimationFrame(step);
     }
 }
