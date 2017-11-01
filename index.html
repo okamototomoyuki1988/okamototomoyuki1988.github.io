@@ -13,24 +13,51 @@
         <div id="jpath">
             <div class="header">
                 <div class="header-item">
-                    <h2>JSON解析　<span class="usage" style="display:none;">&#x2754;</span></h2>
+                    <h2>
+                        JSON解析　<span class="usage" style="display:none;">&#x2754;</span>
+                    </h2>
                     <p class="error"></p>
                 </div>
                 <div class="header-item">
-                    <p>左記のテキストエリアのJSONを<a href="https://github.com/json-path/JsonPath" target="_blank">JSONPath</a>で解析します。</p>
+                    <p>
+                        左のテキストエリアのJSONを<a href="https://github.com/json-path/JsonPath" target="_blank">JSONPath</a>
+                        で解析します。
+                    </p>
                     <input type="textarea" class="query" class="half-w" value="" placeholder="JSONPath クエリ">
                     <input type="checkbox" class="distinct">
                     <label for="distinct">Distinct</label>
                 </div>
             </div>
             <div class="body">
-                <div class="body-item">
+                <div class="full-w">
                     <textarea class="src full-w" placeholder="ここにJSONファイルをドロップすると読み込まれます。
 複数ドロップするとリストにまとめられます。"></textarea>
                 </div>
-                <div class="body-item">
+                <div class="full-w">
                     <textarea class="result full-w" placeholder="解析結果
                     "></textarea>
+                </div>
+            </div>
+        </div>
+        <div id="vlook">
+            <div class="header">
+                <div class="header-item">
+                    <h2>VLookUp</h2>
+                    <p>検索値の一行ごとで一覧のキーを探し、それに紐づく値を結果として出力します。</p>
+                </div>
+            </div>
+            <div class="body">
+                <div class="body-item">
+                    <textarea class="query" placeholder="検索値"></textarea>
+                </div>
+                <div class="body-item">
+                    <textarea class="key" placeholder="一覧のキー"></textarea>
+                </div>
+                <div class="body-item">
+                    <textarea class="value" placeholder="一覧の値"></textarea>
+                </div>
+                <div class="body-item">
+                    <textarea class="result" placeholder="結果"></textarea>
                 </div>
             </div>
         </div>
