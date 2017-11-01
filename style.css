@@ -11,12 +11,13 @@
 #json-area {
     display: flex;
     flex-direction: column;
-    width:100%;
+    width: 100%;
 }
+
 #json-header {
     display: flex;
     flex-direction: row;
-    width:100%;
+    width: 100%;
 }
 
 .json-header-item {
@@ -26,7 +27,7 @@
 #json-body {
     display: flex;
     flex-direction: row;
-    width:100%;
+    width: 100%;
 }
 
 .json-body-item {
@@ -34,9 +35,9 @@
 }
 
 .full-w {
-    width:100%;
+    width: 100%;
 }
 
 .half-w {
-    width:50%;
+    width: 50%;
 }
