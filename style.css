@@ -41,3 +41,8 @@
 .half-w {
     width: 50%;
 }
+
+#error {
+    color: #ff0000;
+    word-wrap: break-word;
+}

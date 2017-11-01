@@ -18,13 +18,24 @@ window.onload = ()=>{
             let files = evt.dataTransfer.files;
 
             // ファイル非同期読み込み
-            let strs = [];
+            let objs = [];
+            let errors = [];
             const readFileAsync = (f)=>{
                 return new Promise((resolve)=>{
                     let reader = new FileReader();
                     reader.readAsText(f);
                     reader.onload = (content)=>{
-                        strs = [...strs, content.target.result];
+                        let result = content.target.result;
+                        // JSONか
+                        let obj = null;
+                        try {
+                            obj = JSON.parse(result);
+                        } catch (e) {
+                            errors.push(f.name);
+                        }
+                        if (obj != null) {
+                            objs = [...objs, obj];
+                        }
                         resolve();
                     }
                 }
@@ -32,12 +43,20 @@ window.onload = ()=>{
             }
 
             Promise.all(files.map((f)=>readFileAsync(f))).then(()=>{
-                if (strs.length > 1) {
+                if (objs.length > 1) {
                     // 複数ならリストにまとめる
-                    $("#read-json").value = JSON.stringify(strs.map((str)=>JSON.parse(str)), null, 2);
+                    $("#read-json").value = JSON.stringify(objs, null, 2);
                 } else {
                     // 一つならそのまま
-                    $("#read-json").value = JSON.stringify(JSON.parse(strs[0]), null, 2);
+                    $("#read-json").value = JSON.stringify(objs[0], null, 2);
+                }
+
+                // エラー表示
+                if (errors.length > 0) {
+                    $("#error").innerHTML = "下記はフォーマットが不正なためスキップしました。<br>" + errors.join(",");
+                } else {
+                    // エラー無し
+                    $("#error").innerHTML = "";
                 }
 
             }
@@ -67,27 +86,36 @@ window.onload = ()=>{
                 start = null;
                 // 3秒ごとにクエリ実行
 
+                let resultText = null;
                 let obj = null;
-                try {
-                    obj = JSON.parse($("#read-json").value);
-                } catch (e) {}
+
+                let src = $("#read-json").value;
+                if (src != "") {
+                    try {
+                        obj = JSON.parse($("#read-json").value);
+                    } catch (e) {
+                        resultText = "JSONが不正です"
+                    }
+                } else {
+                    resultText = "";
+                }
 
                 if (obj != null) {
-                    let result = null;
+                    let queryResult = null;
                     try {
-                        result = JSONPath({
+                        queryResult = JSONPath({
                             json: obj,
                             path: $("#query").value
                         });
                     } catch (e) {}
 
-                    if ($("#distinct").checked) {
+                    if (queryResult != null && $("#distinct").checked) {
                         // 重複削除
                         let distinctList = [];
-                        for (let i = 0; i < result.length; i++) {
-                            let ele1 = result[i];
-                            for (let j = i + 1; j < result.length; j++) {
-                                let ele2 = result[j];
+                        for (let i = 0; i < queryResult.length; i++) {
+                            let ele1 = queryResult[i];
+                            for (let j = i + 1; j < queryResult.length; j++) {
+                                let ele2 = queryResult[j];
                                 if (JSON.stringify(ele1) === JSON.stringify(ele2)) {
                                     ele1 = undefined;
                                     break;
@@ -98,11 +126,13 @@ window.onload = ()=>{
                                 distinctList.push(ele1);
                             }
                         }
-                        result = distinctList;
+                        queryResult = distinctList;
                     }
 
-                    $("#result").value = JSON.stringify(result, null, 2);
+                    resultText = JSON.stringify(queryResult, null, 2);
                 }
+                // 結果表示
+                $("#result").value = resultText;
             }
 
             window.requestAnimationFrame(step);
