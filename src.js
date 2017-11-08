@@ -4,6 +4,25 @@ FileList.prototype.map = function() {
 }
 
 window.onload = ()=>{
+
+    // 毎フレーム更新
+    let _updates = [];
+
+    // 更新
+    const _animationFrame = ()=>{
+        return new Promise(resolve=>window.requestAnimationFrame((delta) => resolve(delta)));
+    }
+    const _routine = async()=>{
+        // the game loop
+        while (true) {
+            var delta = await _animationFrame();
+            for (let _update of _updates) {
+                _update(delta);
+            }
+        }
+    }
+    _routine();
+
     // JSONPath
     {
         // クエリショートカット
@@ -139,10 +158,8 @@ window.onload = ()=>{
                     // 結果表示
                     $(".result").value = resultText;
                 }
-
-                window.requestAnimationFrame(step);
             }
-            window.requestAnimationFrame(step);
+            _updates.push(step);
         }
     }
 
@@ -188,9 +205,8 @@ window.onload = ()=>{
                     result.value += value;
                 }
             }
-
-            window.requestAnimationFrame(step);
         }
-        window.requestAnimationFrame(step);
+        _updates.push(step);
+
     }
 }
