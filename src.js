@@ -10,7 +10,7 @@ window.onload = ()=>{
 
     // 更新
     const _animationFrame = ()=>{
-        return new Promise(resolve=>window.requestAnimationFrame((delta) => resolve(delta)));
+        return new Promise(resolve=>window.requestAnimationFrame((delta)=>resolve(delta)));
     }
     const _routine = async()=>{
         // the game loop
@@ -30,16 +30,13 @@ window.onload = ()=>{
 
         // ファイル読み込み
         {
-            const handleFileSelect = (evt)=>{
+            // 読み込み処理定義
+            const handleFileSelect = async(evt)=>{
                 evt.stopPropagation();
                 evt.preventDefault();
 
                 // ファイル情報取得
                 let files = evt.dataTransfer.files;
-
-                // ファイル非同期読み込み
-                let objs = [];
-                let errors = [];
                 const readFileAsync = (f)=>{
                     return new Promise((resolve)=>{
                         let reader = new FileReader();
@@ -47,40 +44,44 @@ window.onload = ()=>{
                         reader.onload = (content)=>{
                             let result = content.target.result;
                             // JSONか
-                            let obj = null;
                             try {
-                                obj = JSON.parse(result);
+                                resolve(JSON.parse(result));
                             } catch (e) {
-                                errors.push(f.name);
+                                resolve(null);
                             }
-                            if (obj != null) {
-                                objs = [...objs, obj];
-                            }
-                            resolve();
                         }
                     }
                     );
                 }
 
-                Promise.all(files.map((f)=>readFileAsync(f))).then(()=>{
-                    if (objs.length > 1) {
-                        // 複数ならリストにまとめる
-                        $(".src").value = JSON.stringify(objs, null, 2);
+                // 読み込み実行
+                let objs = [];
+                let errors = [];
+                for (let f of files) {
+                    let obj = await readFileAsync(f);
+                    if (obj != null) {
+                        objs = [...objs, obj];
                     } else {
-                        // 一つならそのまま
-                        $(".src").value = JSON.stringify(objs[0], null, 2);
+                        errors = [...errors, f.name];
                     }
-
-                    // エラー表示
-                    if (errors.length > 0) {
-                        $(".error").innerHTML = "下記はフォーマットが不正なためスキップしました。<br>" + errors.join(",");
-                    } else {
-                        // エラー無し
-                        $(".error").innerHTML = "";
-                    }
-
                 }
-                );
+
+                if (objs.length > 1) {
+                    // 複数ならリストにまとめる
+                    $(".src").value = JSON.stringify(objs, null, 2);
+                } else {
+                    // 一つならそのまま
+                    $(".src").value = JSON.stringify(objs[0], null, 2);
+                }
+
+                // エラー表示
+                if (errors.length > 0) {
+                    $(".error").innerHTML = "下記はフォーマットが不正なためスキップしました。<br>" + errors.join(",");
+                } else {
+                    // エラー無し
+                    $(".error").innerHTML = "";
+                }
+
             }
 
             const handleDragOver = (evt)=>{
