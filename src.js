@@ -103,7 +103,7 @@ window.onload = ()=>{
             let step = (timestamp)=>{
                 if (!start)
                     start = timestamp;
-                var delta = timestamp - start;
+                let delta = timestamp - start;
                 if (delta > 1500) {
                     start = null;
                     // 3秒ごとにクエリ実行
@@ -164,46 +164,57 @@ window.onload = ()=>{
         }
     }
 
-    // VLookUp
+    // Distinct
     {
         // クエリショートカット
-        const $ = (query)=>document.querySelector("#vlook").querySelector(query);
+        const $ = (query)=>document.querySelector("#distinct").querySelector(query);
 
         // 更新
         let start = null;
         let step = (timestamp)=>{
             if (!start)
                 start = timestamp;
-            var delta = timestamp - start;
+            let delta = timestamp - start;
             if (delta > 1500) {
                 start = null;
                 // 3秒ごとに実行
 
                 let resultText = null;
 
-                let queryText = $(".query").value;
-                let queryLines = queryText.split(/\r\n|\r|\n/);
-
-                let keyText = $(".key").value;
-                let keyLines = keyText.split(/\r\n|\r|\n/);
-
-                let valueText = $(".value").value;
-                let valueLines = valueText.split(/\r\n|\r|\n/);
+                let orgText = $(".org").value;
+                let orgLines = orgText.split(/\r\n|\r|\n/);
 
                 let result = $(".result");
                 result.value = "";
 
-                for (let queryLine of queryLines) {
-                    let value = "\n";
-                    for (let i = 0; i < keyLines.length; i++) {
-                        if (queryLine === keyLines[i]) {
-                            if (i < valueLines.length) {
-                                value = valueLines[i] + "\n";
-                                break;
+                // 数値の変換して取り込み
+                let nums = [];
+                for (let org of orgLines) {
+                    if (org != "") {
+                        let num = Number(org);
+                        if (isNaN(num)) {
+                            result.value = "数値に変換できない行がありました。";
+                            nums = null;
+                            break;
+                        } else {
+                            // 未追加なら追加
+                            if (nums.indexOf(num) < 0) {
+                                nums.push(num);
                             }
                         }
                     }
-                    result.value += value;
+                }
+
+                // エラーでなければ表示
+                if (nums != null) {
+                    // ソート
+                    nums.sort(function(a, b) {
+                        return (parseInt(a) > parseInt(b)) ? 1 : -1;
+                    });
+                    // 書き込み
+                    for (let num of nums) {
+                        result.value += num + "\n";
+                    }
                 }
             }
         }
