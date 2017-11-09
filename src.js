@@ -164,6 +164,53 @@ window.onload = ()=>{
         }
     }
 
+    // VLookUp
+    {
+        // クエリショートカット
+        const $ = (query)=>document.querySelector("#vlook").querySelector(query);
+
+        // 更新
+        let start = null;
+        let step = (timestamp)=>{
+            if (!start)
+                start = timestamp;
+            var delta = timestamp - start;
+            if (delta > 1500) {
+                start = null;
+                // 3秒ごとに実行
+
+                let resultText = null;
+
+                let queryText = $(".query").value;
+                let queryLines = queryText.split(/\r\n|\r|\n/);
+
+                let keyText = $(".key").value;
+                let keyLines = keyText.split(/\r\n|\r|\n/);
+
+                let valueText = $(".value").value;
+                let valueLines = valueText.split(/\r\n|\r|\n/);
+
+                let result = $(".result");
+                result.value = "";
+
+                for (let queryLine of queryLines) {
+                    let value = "\n";
+                    for (let i = 0; i < keyLines.length; i++) {
+                        if (queryLine === keyLines[i]) {
+                            if (i < valueLines.length) {
+                                value = valueLines[i] + "\n";
+                                break;
+                            }
+                        }
+                    }
+                    result.value += value;
+                }
+            }
+        }
+        _updates.push(step);
+
+    }
+
     // Distinct
     {
         // クエリショートカット
