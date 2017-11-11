@@ -238,7 +238,7 @@ window.onload = ()=>{
                 let nums = [];
                 for (let org of orgLines) {
                     if (org != "") {
-                        let num = Number(org);
+                        let num = Number(org.replace(/,/g, ""));
                         if (isNaN(num)) {
                             result.value = "数値に変換できない行がありました。";
                             nums = null;
@@ -262,6 +262,60 @@ window.onload = ()=>{
                     for (let num of nums) {
                         result.value += num + "\n";
                     }
+                }
+            }
+        }
+        _updates.push(step);
+
+    }
+
+    // Sum
+    {
+        // クエリショートカット
+        const $ = (query)=>document.querySelector("#sum").querySelector(query);
+
+        // 更新
+        let start = null;
+        let step = (timestamp)=>{
+            if (!start)
+                start = timestamp;
+            let delta = timestamp - start;
+            if (delta > 1500) {
+                start = null;
+                // 3秒ごとに実行
+
+                let resultText = null;
+
+                let orgText = $(".org").value;
+                let orgLines = orgText.split(/\r\n|\r|\n/);
+
+                let result = $(".result");
+                result.value = "";
+
+                // 数値の変換して取り込み
+                let nums = [];
+                for (let org of orgLines) {
+                    if (org != "") {
+                        let num = Number(org.replace(/,/g, ""));
+                        if (isNaN(num)) {
+                            result.value = "数値に変換できない行がありました。";
+                            nums = null;
+                            break;
+                        } else {
+                            nums.push(num);
+                        }
+                    }
+                }
+
+                // エラーでなければ表示
+                if (nums != null) {
+                    // 和
+                    let sum = nums.reduce((sum,current)=>{
+                        return sum + current;
+                    }
+                    , 0);
+
+                    result.value += sum + "\n\n要素数：" + nums.length;
                 }
             }
         }
