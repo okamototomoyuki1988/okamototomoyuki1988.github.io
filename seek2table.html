@@ -1,0 +1,37 @@
+<html>
+    <head>
+        <script src="./lib/jsonpath.js"></script>
+        <script src="./seek2table.js"></script>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <h1>Seek To Table</h1>
+        <div id="seek2table">
+            <div class="header">
+                <div class="header-item">
+                    <h2>
+                        seek to table<span class="usage" style="display:none;">&#x2754;</span>
+                    </h2>
+                </div>
+                <div class="header-item">
+                    <p>
+                        マークアップされた文字列の羅列をテーブル化します。
+                    </p>
+                    <input type="textarea" class="regex half-w" value="^(.)" placeholder="マークアップ抽出の正規表現">
+                    <input type="checkbox" id="col" class="col">
+                    <label for="col">カラム</label>
+                    <input type="checkbox" id="distinct" class="distinct">
+                    <label for="distinct">↓</label>
+                </div>
+            </div>
+            <div class="body">
+                <div class="full-w">
+                    <textarea class="src full-w" placeholder="マーキング文字列"></textarea>
+                </div>
+                <div class="full-w">
+                    <textarea class="result full-w" placeholder="テーブル"></textarea>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
