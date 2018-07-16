@@ -18,17 +18,29 @@ window.onload = () => {
             localStorage.setItem(_KEY_SAVE_SRC, $src.value);
         });
 
-        // 再生機能
-        let speech = null;
+        // 再生されてる可能性があるので止める
+        speechSynthesis.cancel();
+        $play.innerText = "⏵";
+
+        // ボタン押下
         $play.addEventListener('click', () => {
-            if (speech !== null)
-            {
-                speech = new SpeechSynthesisUtterance();                
+            if (speechSynthesis.speaking) {
+                // 再生中
+
+                // 止めて再生ボタン表示
+                speechSynthesis.cancel();
+                $play.innerText = "⏵";
+            } else {
+                // 停止中
+
+                // 再生して停止ボタン表示
+                let speech = new SpeechSynthesisUtterance();
+                speech.text = $src.value;
+                speech.rate = $(".speed:checked").value;
+                speech.lang = 'ja-JP';
+                speechSynthesis.speak(speech);
+                $play.innerText = "■";
             }
-            speech.text = $src.value;
-            speech.rate = $(".speed:checked").value;
-            speech.lang = 'ja-JP';
-            speechSynthesis.speak(speech);
         });
     }
 }
