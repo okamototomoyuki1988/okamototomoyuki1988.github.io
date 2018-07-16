@@ -1,0 +1,27 @@
+{
+    "manifest_version": 2,
+    "name": "4xSpeech",
+    "version": "1.1.1.1",
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "content.js"
+            ]
+        }
+    ],
+    "background": {
+        "scripts": [
+            "background.js"
+        ],
+        "persistent": true
+    },
+    "browser_action": {
+        "default_title": "4xSpeech"
+    },
+    "permissions": [
+        "activeTab"
+    ]
+}
