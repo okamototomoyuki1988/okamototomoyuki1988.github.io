@@ -2,11 +2,11 @@
 
 // バックエンドからの呼び出し時
 chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
-  // 音声一旦停止
-  window.speechSynthesis.cancel();
-
-  // 0.1秒後再生 ※停止フレームでは再生できないため
-  setTimeout(function () {
+  if (window.speechSynthesis.speaking) {
+    // 音声停止
+    window.speechSynthesis.cancel();
+  } else {
+    // 未再生
     // DOMがあれば再生
     let obj = document.querySelector("object")
     if (obj !== null) {
@@ -19,5 +19,5 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
         window.speechSynthesis.speak(speech);
       }
     }
-  }, 100);
+  }
 });
