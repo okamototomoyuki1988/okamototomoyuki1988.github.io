@@ -39,8 +39,11 @@ window.onload = () => {
 
                 // 変な読み方をされる記号は読み上げない。
                 text = text.replace(/(\{|\}|\<|\>|⇒|;|\/)/g, ' ');
+                // 区切り文字の待ちが長いのでスペースにする
+                text = text.replace(/(。|、)/g, ' ');
+                
                 text = text.replace(/[\r|\n]/g, ' ');
-                text = text.replace(/ +/g, ' ');
+                text = text.replace(/\s+/g, ' ');
 
                 speech.text = text;
                 speech.rate = $(".speed:checked").value;
