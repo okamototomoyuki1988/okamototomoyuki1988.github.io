@@ -37,10 +37,10 @@ window.onload = () => {
                 let speech = new SpeechSynthesisUtterance();
                 var text = $src.value;
 
-                // 変な読み方をされる記号は読み上げない。
-                text = text.replace(/(\{|\}|\<|\>|⇒|;|\/)/g, ' ');
-                // 区切り文字の待ちが長いのでスペースにする
-                text = text.replace(/(。|、)/g, ' ');
+                // 半角記号は読み上げない。
+                text = text.replace(/[ -/:-@\[-\`\{-\~]/g, ' ');
+                // 全角記号も一部読み上げない。
+                text = text.replace(/(　|。|、|⇒)/g, ' ');
 
                 text = text.replace(/[\r|\n]/g, ' ');
                 text = text.replace(/\s+/g, ' ');
