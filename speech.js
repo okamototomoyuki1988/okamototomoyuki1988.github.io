@@ -41,12 +41,16 @@ window.onload = () => {
                 text = text.replace(/(\{|\}|\<|\>|⇒|;|\/)/g, ' ');
                 // 区切り文字の待ちが長いのでスペースにする
                 text = text.replace(/(。|、)/g, ' ');
-                
+
                 text = text.replace(/[\r|\n]/g, ' ');
                 text = text.replace(/\s+/g, ' ');
 
                 speech.text = text;
-                speech.rate = $(".speed:checked").value;
+                var speed = parseInt($(".speed").value);
+                if (isNaN(speed)) {
+                    speed = 1;
+                }
+                speech.rate = speed;
                 speech.lang = 'ja-JP';
                 speechSynthesis.speak(speech);
                 $play.innerText = "■";
