@@ -35,7 +35,14 @@ window.onload = () => {
 
                 // 再生して停止ボタン表示
                 let speech = new SpeechSynthesisUtterance();
-                speech.text = $src.value;
+                var text = $src.value;
+
+                // 変な読み方をされる記号は読み上げない。
+                text = text.replace(/(\{|\}|\<|\>|⇒|;|\/)/g, ' ');
+                text = text.replace(/[\r|\n]/g, ' ');
+                text = text.replace(/ +/g, ' ');
+
+                speech.text = text;
                 speech.rate = $(".speed:checked").value;
                 speech.lang = 'ja-JP';
                 speechSynthesis.speak(speech);
