@@ -40,13 +40,13 @@ window.onload = () => {
                 // 半角記号は読み上げない。
                 text = text.replace(/[ -/:-@\[-\`\{-\~]/g, ' ');
                 // 全角記号も一部読み上げない。
-                text = text.replace(/(　|。|、|：|（|）|⇒|？)/g, ' ');
+                text = text.replace(/(　|。|、|：|（|）|⇒|？|・|，|＃|＞|＜|＿|\”|’|｜|‘|)/g, ' ');
 
                 text = text.replace(/[\r|\n]/g, ' ');
                 text = text.replace(/\s+/g, ' ');
 
                 speech.text = text;
-                var speed = parseInt($(".speed").value);
+                var speed = 1000;
                 if (isNaN(speed)) {
                     speed = 1;
                 }
