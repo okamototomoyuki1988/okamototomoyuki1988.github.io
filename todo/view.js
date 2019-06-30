@@ -34,37 +34,28 @@ window.onload = async () => {
         const db = firebase.firestore();
         const docRef = db.collection(_COL).doc(pId);
 
-        let text = null;
-        try {
-            let doc = await docRef.get();
-            if (doc.exists) {
-                text = doc.data().text;
-                $text.value = text;
-            }
-        } catch (e) {
-            $text.value = "Error getting document:" + e;
-            return;
+        let src = null;
+        const doc = await docRef.get();
+        if (doc.exists) {
+            src = doc.data().text;
         }
 
-        let prev = null;
-        const _update = async (timestamp) => {
-            if (prev == null) {
-                prev = timestamp;
-                return;
-            }
-            let delta = timestamp - prev;
-            if (delta > 1500) {
-                prev = timestamp;
-                if (text !== $text.value) {
-                    text = $text.value;
-                    try {
-                        await docRef.set({ "text": text, "date": Date.now() });
-                    } catch (e) {
-                        $text.value = "Error post document:" + e;
-                    }
-                }
-            }
+        const res = await fetch('https://holidays-jp.github.io/api/v1/date.json');
+        const json = await res.json();
+
+        const rows = [];
+        for (let line of src.split(/\r?\n/)) {
+            let row = {};
+            let wk = null;
+
+            wk = line.replace(/^(x|ｘ)/, "")
+            row.isComplete = line !== wk;
+
+            let hourStr = wk.replace(/^.*[\s　]([0-9０-９]*[\.．]?[0-9０-９]+)$/, "$1");
+            hourStr = hourStr.replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 65248));
+            hourStr = hourStr.replace("．", ".");
+            row.hour = Number(hourStr);
+            rows.push(row);
         }
-        _updates.push(_update);
     }
 }

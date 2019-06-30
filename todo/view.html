@@ -1,0 +1,50 @@
+<html>
+
+<head>
+
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/6.2.4/firebase-app.js"></script>
+
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#config-web-app -->
+    <script src="https://www.gstatic.com/firebasejs/6.2.4/firebase-firestore.js"></script>
+
+    <script>
+        // Your web app's Firebase configuration
+        var firebaseConfig = {
+            apiKey: "AIzaSyB4W6FEn7AiwIZ3fryzILeukXgrStVjtPY",
+            authDomain: "todo-782eb.firebaseapp.com",
+            databaseURL: "https://todo-782eb.firebaseio.com",
+            projectId: "todo-782eb",
+            storageBucket: "todo-782eb.appspot.com",
+            messagingSenderId: "1066895603209",
+            appId: "1:1066895603209:web:b3a926f6e5284887"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+    </script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/locale/af.js" integrity="sha256-I5ZXO8KcMnqNkrXU7baGig70nATYjNDnxxA2d40PcR8=" crossorigin="anonymous"></script> -->
+    <script src="./view.js" type="module"></script>
+
+    <link rel="stylesheet" href="./view.css">
+</head>
+
+<body>
+    <div class="todo">
+        <table class="sticky_table">
+            <thead>
+              <tr>
+                <th class="blank">&nbsp;</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th>left</th>
+                <td>data</td>
+              </tr>
+            </tbody>
+          </table>
+    </div>
+</body>
+
+</html>
