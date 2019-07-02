@@ -64,9 +64,10 @@ window.onload = async () => {
         let rowDay = today.clone();
         let addDay = 0;
         for (let row of rows) {
+            row.from = today.clone();
             addDay = Math.round(row.hour / hpd);
             rowDay.add(addDay, "days");
-            row.end = today.clone();
+            row.to = today.clone();
         }
         let lastDay = rowDay.clone();
 
@@ -88,10 +89,12 @@ window.onload = async () => {
             $th.innerText = row.name;
 
             let tdDay = today.clone();
-            while (tdDay.isSameOrAfter(row.end) && tdDay.isSameOrBefore(row.end)) {
+            while (tdDay.isSameOrBefore(lastDay)) {
                 const $td = document.createElement("td");
                 $tr.appendChild($td);
-                $td.innerText = "●";
+                if (tdDay.isSameOrAfter(row.from) && tdDay.isSameOrBefore(row.to)) {
+                    $td.innerText = "●";
+                }
                 tdDay.add(1, "days");
             }
         }
