@@ -64,10 +64,10 @@ window.onload = async () => {
         let rowDay = today.clone();
         let addDay = 0;
         for (let row of rows) {
-            row.from = today.clone();
+            row.from = rowDay.clone();
             addDay = Math.round(row.hour / hpd);
             rowDay.add(addDay, "days");
-            row.to = today.clone();
+            row.to = rowDay.clone();
         }
         let lastDay = rowDay.clone();
 
