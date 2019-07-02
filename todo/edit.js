@@ -21,12 +21,11 @@ window.onload = async () => {
 
         const url = new URL(location.href);
         const params = url.searchParams;
-        const pId = params.get("name");
-        const pPrj = params.get("prj");
+        const pId = params.get("id");
 
         const $text = $(".text");
 
-        if (pId === null || pPrj === null) {
+        if (pId === null) {
             $text.value = "パラメータを入力してください。";
             return;
         }
