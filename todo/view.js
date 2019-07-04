@@ -95,9 +95,8 @@ window.onload = async () => {
 
             const $tr = $("<tr>");
             $tbody.append($tr);
-            if (row.isComplete) {
+            if (row.isComplete)
                 $tr.css("display", "none");
-            }
             const $th = $("<th>");
             $tr.append($th);
             const $ck = $("<input>").attr("type", "checkbox");
@@ -140,11 +139,5 @@ window.onload = async () => {
         }
         const newData = newlines.join("\n");
         await docRef.set({ "text": newData, "date": Date.now() });
-
-        doc = await docRef.get();
-        if (doc.exists)
-            text = doc.data().text;
-
-        render();
     }
 }
