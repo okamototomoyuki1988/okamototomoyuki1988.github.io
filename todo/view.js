@@ -13,9 +13,46 @@ window.onload = async () => {
     const db = firebase.firestore();
     const docRef = db.collection(FS_COL).doc(pId);
 
-    class Row { }
+    class Content {
+        rows = [];
 
-    let text = null;
+        constructor(list) {
+            for (const ele in list)
+                rows.push(Row.new(ele));
+        }
+
+        equals(other) {
+            if (this.rows.length != other.rows.length)
+                return false;
+
+            for (const i in this.rows)
+                if (!this.rows[i].equals(other.rows[i]))
+                    return false;
+            return true;
+        }
+    }
+
+    class Row {
+        isComplete;
+        hour;
+        isNest;
+
+        from;
+        to;
+
+        static new = (obj) => {
+            const row = new Row();
+            obj && Object.assign(this, obj);
+            return row;
+        }
+
+        equals = (other) =>
+            this.isComplete == other.isComplete
+            && this.hour == other.hour
+            && this.isNest == other.isNest;
+    }
+
+    let content = null;
 
     const res = await fetch('https://holidays-jp.github.io/api/v1/date.json');
     const holidayDic = await res.json();
@@ -24,9 +61,9 @@ window.onload = async () => {
         while (true) {
             let doc = await docRef.get();
             if (doc.exists) {
-                let newText = doc.data().text;
-                if (text !== newText) {
-                    text = newText;
+                let newContent = new Content(doc.data().content);
+                if (content == null || !content.equals(newContent)) {
+                    content = newContent;
                     render();
                 }
             }
@@ -35,6 +72,19 @@ window.onload = async () => {
     }
     _read();
 
+    $('html').keydown(e => {
+        switch (e.which) {
+            case 39:
+                break;
+            case 37:
+                break;
+            case 38:
+                break;
+            case 40:
+                break;
+        }
+    });
+
     const render = async () => {
         const $thead = $("thead");
         const $tbody = $("tbody");
@@ -42,27 +92,10 @@ window.onload = async () => {
         $thead.find("th:not(.blank)").remove();
         $tbody.empty();
 
-        const rows = [];
-        for (const line of text.split(/\r?\n/)) {
-            const row = new Row();
-            let wk = null;
-
-            wk = line.replace(/^(x|ｘ)/, "")
-            row.isComplete = line !== wk;
-            let name = wk.replace(/^(.*)[\s　]([0-9０-９]*[\.．]?[0-9０-９]+)$/, "$1");
-            row.name = name;
-
-            let hourStr = wk.replace(/^.*[\s　]([0-9０-９]*[\.．]?[0-9０-９]+)$/, "$1");
-            hourStr = hourStr.replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 65248));
-            hourStr = hourStr.replace("．", ".");
-            row.hour = Number(hourStr);
-            rows.push(row);
-        }
-
         let today = moment({ hour: 0, minute: 0, seconds: 0, milliseconds: 0 });
         let rowDay = today.clone();
         let addDay = 0;
-        for (let row of rows) {
+        for (let row of content.rows) {
             if (row.isComplete == false) {
                 row.from = rowDay.clone();
                 addDay = Math.round(row.hour / hpd);
@@ -90,9 +123,8 @@ window.onload = async () => {
             colDay.add(1, "days");
         }
 
-        for (let i = 0; i < rows.length; i++) {
-            const row = rows[i];
-
+        for (const i of content.rows) {
+            const row = content.rows[i];
             const $tr = $("<tr>");
             $tbody.append($tr);
             if (row.isComplete)
@@ -129,15 +161,7 @@ window.onload = async () => {
     }
 
     const check = async (index) => {
-        const lines = text.split(/\r?\n/);
-        const newlines = [];
-        for (let i = 0; i < lines.length; i++) {
-            if (i == index)
-                newlines.push("x" + lines[i]);
-            else
-                newlines.push(lines[i]);
-        }
-        const newData = newlines.join("\n");
-        await docRef.set({ "text": newData, "date": Date.now() });
+        content.rows[index].isComplete = true;
+        await docRef.set({ "content": content, "date": Date.now() });
     }
 }
