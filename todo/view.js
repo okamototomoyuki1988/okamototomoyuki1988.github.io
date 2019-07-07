@@ -2,7 +2,9 @@ window.onload = async () => {
 
     const url = new URL(location.href);
     const params = url.searchParams;
-    const pId = params.get("id");
+    // const pId = params.get("id");
+    // TODO 
+    const pId = "1";
     const pHpd = params.get("hpd");
 
     if (pId === null)
@@ -14,11 +16,10 @@ window.onload = async () => {
     const docRef = db.collection(FS_COL).doc(pId);
 
     class Content {
-        rows = [];
-
         constructor(list) {
-            for (const ele in list)
-                rows.push(Row.new(ele));
+            this.rows = [];
+            for (const ele of list)
+                this.rows.push(Row.new(ele));
         }
 
         equals(other) {
@@ -30,26 +31,48 @@ window.onload = async () => {
                     return false;
             return true;
         }
+        get object() {
+            const list = [];
+            for (const row of this.rows) {
+                list.push(row.object);
+            }
+            return list;
+        }
     }
 
     class Row {
-        isComplete;
-        hour;
-        isNest;
+        constructor() {
+            this.isComplete = false;
+            this.text = null;
+            this.hour = 0;
+            this.isNest = false;
 
-        from;
-        to;
-
+            this.from = null;
+            this.to = null;
+        }
         static new = (obj) => {
             const row = new Row();
-            obj && Object.assign(this, obj);
+            row.isComplete = obj.isComplete;
+            row.text = obj.text;
+            row.hour = obj.hour;
+            row.isNest = obj.isNest;
             return row;
         }
 
         equals = (other) =>
             this.isComplete == other.isComplete
+            && this.text == other.text
             && this.hour == other.hour
             && this.isNest == other.isNest;
+
+        get object() {
+            return {
+                isComplete: this.isComplete,
+                text: this.text,
+                hour: this.hour,
+                isNest: this.isNest,
+            };
+        }
     }
 
     let content = null;
@@ -58,39 +81,53 @@ window.onload = async () => {
     const holidayDic = await res.json();
 
     const _read = async () => {
-        while (true) {
-            let doc = await docRef.get();
-            if (doc.exists) {
-                let newContent = new Content(doc.data().content);
-                if (content == null || !content.equals(newContent)) {
-                    content = newContent;
-                    render();
-                }
-            }
-            await sleep(SPAN);
+        //     while (true) {
+        let doc = await docRef.get();
+        if (doc.exists) {
+            content = new Content(doc.data().content);
+            // let newContent = new Content(doc.data().content);
+            // if (content == null || !content.equals(newContent)) {
+            // content = newContent;
+            render();
+            // }
         }
+        // await sleep(SPAN);
+        //     }
     }
     _read();
 
-    $('html').keydown(e => {
-        switch (e.which) {
-            case 39:
-                break;
-            case 37:
-                break;
-            case 38:
-                break;
-            case 40:
-                break;
+    const _key = (e, query) => {
+        if (query.includes("#") && e.shiftKey == false) {
+            return false;
         }
+        if (query.includes("%") && e.ctrlKey == false) {
+            return false;
+        }
+        if (query.includes("&") && e.altKey == false) {
+            return false;
+        }
+        if (query.includes(e.key)) {
+            return true;
+        }
+    }
+    $('html').keydown(async e => {
+        if (_key(e, "o")) {
+            content.rows.push(new Row());
+            await push();
+
+            render();
+            return false;
+        }
+        return true;
     });
 
     const render = async () => {
-        const $thead = $("thead");
-        const $tbody = $("tbody");
-
-        $thead.find("th:not(.blank)").remove();
-        $tbody.empty();
+        const $days = $(".days");
+        const $keys = $(".keys");
+        const $datas = $(".datas");
+        $days.empty();
+        $keys.empty();
+        $datas.empty();
 
         let today = moment({ hour: 0, minute: 0, seconds: 0, milliseconds: 0 });
         let rowDay = today.clone();
@@ -105,12 +142,11 @@ window.onload = async () => {
         }
         let lastDay = rowDay.clone();
 
-        const $ths = $(".ths");
         let colDay = today.clone();
         while (colDay.isSameOrBefore(lastDay)) {
-            const $th = $("<th>");
-            $th.text(colDay.format("DD"));
-            $ths.append($th);
+            const $day = $("<div>");
+            $day.text(colDay.format("DD"));
+            $days.append($day);
             let color = null;
             if (colDay.day() == 0 || colDay.day() == 6 || holidayDic[colDay.format("YYYY-MM-DD")])
                 color = "#A6A";
@@ -119,32 +155,43 @@ window.onload = async () => {
             else
                 color = "#244";
 
-            $th.css("background-color", color);
+            $day.css("background-color", color);
             colDay.add(1, "days");
         }
 
-        for (const i of content.rows) {
+        for (const i in content.rows) {
             const row = content.rows[i];
-            const $tr = $("<tr>");
-            $tbody.append($tr);
             if (row.isComplete)
-                $tr.css("display", "none");
-            const $th = $("<th>");
-            $tr.append($th);
-            const $ck = $("<input>").attr("type", "checkbox");
-            $th.append($ck);
+                continue;
+            // $tr.css("display", "none");
+            const $ck = $(`<input type='checkbox'/>`);
             $ck.click(() => check(i));
-            $th.append(row.name);
-            $th.css("background-color", i % 2 == 0 ? "#eee" : "#ddd");
+            const $ckdiv = $(`<div>`);
+            $ckdiv.append($ck);
+            $keys.append($ckdiv);
+
+            const $name = $(`<input type='text'/>`);
+            $name.val(row.text);
+            $name.on('input', () => { row.text = $name.val(); push(); });
+            const $namediv = $(`<div>`);
+            $namediv.append($name);
+            $keys.append($namediv);
+
+            const $h = $(`<input type='text'/>`);
+            $h.val(row.hour);
+            $h.on('input', () => { row.hour = $h.val(); push(); });
+            const $hdiv = $(`<div>`);
+            $hdiv.append($h);
+            $keys.append($hdiv);
 
             let tdDay = today.clone();
             while (tdDay.isSameOrBefore(lastDay)) {
-                const $td = $("<td>");
-                $tr.append($td);
+                const $data = $("<div>");
+                $datas.append($data);
                 if (tdDay.isSameOrAfter(row.from) && tdDay.isSameOrBefore(row.to))
-                    $td.html("●");
+                    $data.html("●");
                 else
-                    $td.html("&nbsp;");
+                    $data.html("&nbsp;");
 
                 let color = null;
                 if (tdDay.day() == 0 || tdDay.day() == 6 || holidayDic[tdDay.format("YYYY-MM-DD")])
@@ -154,14 +201,21 @@ window.onload = async () => {
                 else
                     color = i % 2 == 0 ? "#dee" : "#cdd";
 
-                $td.css("background-color", color);
+                $data.css("background-color", color);
                 tdDay.add(1, "days");
             }
+
+            const $data = $("<div class='newline'></div>");
+            $datas.append($data);
         }
     }
 
     const check = async (index) => {
         content.rows[index].isComplete = true;
-        await docRef.set({ "content": content, "date": Date.now() });
+        await push();
+    }
+
+    const push = async () => {
+        await docRef.set({ "content": content.object, "date": Date.now() });
     }
 }

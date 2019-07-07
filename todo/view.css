@@ -1,11 +1,47 @@
-.sticky_table {
-    display: block;
-    position: relative;
-    overflow: scroll;
+.container {
+    display: grid;
     width: 100%;
     height: 100%;
-    border-collapse: collapse;
-    font-size: 0;
+    grid-template-columns: 300px 1fr;
+    grid-template-rows: 30px 1fr;
+}
+
+.container>div {
+    overflow: hidden;
+}
+
+.blank, .keys {
+    display: grid;
+    grid-template-columns: 30px 1fr 30px;
+}
+
+.days {
+    display: flex;
+    overflow: hidden;
+}
+
+.days div, .datas div {
+    flex-basis: 25px;
+    flex-shrink: 0;
+}
+
+input {
+    width: 100%;
+}
+
+.datas {
+    display: flex;
+    flex-flow: row wrap;
+    overflow: scroll;
+}
+
+div {
+    text-align: center;
+}
+
+.datas .newline {
+    flex-basis: 100%;
+    flex-shrink: 0;
 }
 
 .sticky_table thead, .sticky_table tbody {
@@ -19,9 +55,9 @@
     height: 1.4rem;
     font-size: 1.0rem;
     text-align: center;
-
     background-color: #244;
 }
+
 .sticky_table thead th {
     color: #fff;
 }
