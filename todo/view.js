@@ -82,6 +82,13 @@ window.onload = async () => {
         }
     }
 
+    const $days = $(".days");
+    const $keys = $(".keys");
+    const $datas = $(".datas");
+
+    const $text = $("textarea");
+    const $textdiv = $("div.text");
+
     let content = null;
 
     const res = await fetch('https://holidays-jp.github.io/api/v1/date.json');
@@ -93,9 +100,8 @@ window.onload = async () => {
         if (doc.exists) {
             content.load(doc.data().content)
         }
-        render();
     }
-    _read();
+    await _read();
 
     const _key = (e, query) =>
         false == (query.includes("#") && e.shiftKey == false
@@ -114,14 +120,20 @@ window.onload = async () => {
         return true;
     });
 
-    const $days = $(".days");
-    const $keys = $(".keys");
-    const $datas = $(".datas");
+    const reloadText = () => {
+        let text = "";
+        for (const row of content.rows) {
+            if (row.isComplete  == false)
+                text += row.text + "\n";
+        }
+        $text.val(text);
+    }
+    reloadText();
 
-    const $text = $("textarea");
-    const $textdiv = $("div.text");
     $text.on("input", (e) => {
-        content.text = $text.val();
+        const lines = $text.val().split(/\r?\n/);
+        for (const i in lines)
+            content.rows[i].text = lines[i];
     });
 
     const render = async () => {
@@ -204,10 +216,10 @@ window.onload = async () => {
             $datas.append($data);
         }
 
-        updateText();
+        scaleTextarea();
     }
 
-    const updateText = () => {
+    const scaleTextarea = () => {
         let linenum = content.rows.length + 1;
         $textdiv.css("grid-row-end", linenum);
         $text.css("height", linenum * 24.5 + "px");
@@ -215,9 +227,13 @@ window.onload = async () => {
 
     const check = async (index) => {
         content.rows[index].isComplete = true;
+        reloadText();
+        render();
     }
 
     const push = async () => {
         await docRef.set({ "content": content.object, "date": Date.now() });
     }
+
+    render();
 }
