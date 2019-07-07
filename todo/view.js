@@ -2,9 +2,7 @@ window.onload = async () => {
 
     const url = new URL(location.href);
     const params = url.searchParams;
-    // const pId = params.get("id");
-    // TODO 
-    const pId = "1";
+    const pId = params.get("id");
     const pHpd = params.get("hpd");
 
     if (pId === null)
@@ -16,10 +14,17 @@ window.onload = async () => {
     const docRef = db.collection(FS_COL).doc(pId);
 
     class Content {
-        constructor(list) {
+        constructor() {
             this.rows = [];
-            for (const ele of list)
-                this.rows.push(Row.new(ele));
+        }
+
+        load(obj) {
+            this.rows = [];
+            for (const ele of obj.rows) {
+                const row = new Row();
+                row.load(ele);
+                this.rows.push(row);
+            }
         }
 
         equals(other) {
@@ -31,12 +36,14 @@ window.onload = async () => {
                     return false;
             return true;
         }
+
         get object() {
-            const list = [];
+            const obj = {};
+            obj.rows = [];
             for (const row of this.rows) {
-                list.push(row.object);
+                obj.rows.push(row.object);
             }
-            return list;
+            return obj;
         }
     }
 
@@ -50,13 +57,13 @@ window.onload = async () => {
             this.from = null;
             this.to = null;
         }
-        static new = (obj) => {
+
+        load = (obj) => {
             const row = new Row();
             row.isComplete = obj.isComplete;
             row.text = obj.text;
             row.hour = obj.hour;
             row.isNest = obj.isNest;
-            return row;
         }
 
         equals = (other) =>
@@ -81,35 +88,21 @@ window.onload = async () => {
     const holidayDic = await res.json();
 
     const _read = async () => {
-        //     while (true) {
         let doc = await docRef.get();
+        content = new Content();
         if (doc.exists) {
-            content = new Content(doc.data().content);
-            // let newContent = new Content(doc.data().content);
-            // if (content == null || !content.equals(newContent)) {
-            // content = newContent;
-            render();
-            // }
+            content.load(doc.data().content)
         }
-        // await sleep(SPAN);
-        //     }
+        render();
     }
     _read();
 
-    const _key = (e, query) => {
-        if (query.includes("#") && e.shiftKey == false) {
-            return false;
-        }
-        if (query.includes("%") && e.ctrlKey == false) {
-            return false;
-        }
-        if (query.includes("&") && e.altKey == false) {
-            return false;
-        }
-        if (query.includes(e.key)) {
-            return true;
-        }
-    }
+    const _key = (e, query) =>
+        false == (query.includes("#") && e.shiftKey == false
+            || query.includes("%") && e.ctrlKey == false
+            || query.includes("&") && e.altKey == false
+            || query.includes(e.key) == false);
+
     $('html').keydown(async e => {
         if (_key(e, "o")) {
             content.rows.push(new Row());
@@ -121,12 +114,19 @@ window.onload = async () => {
         return true;
     });
 
+    const $days = $(".days");
+    const $keys = $(".keys");
+    const $datas = $(".datas");
+
+    const $text = $("textarea");
+    const $textdiv = $("div.text");
+    $text.on("input", (e) => {
+        content.text = $text.val();
+    });
+
     const render = async () => {
-        const $days = $(".days");
-        const $keys = $(".keys");
-        const $datas = $(".datas");
         $days.empty();
-        $keys.empty();
+        $keys.find("div:not(.text)").remove();
         $datas.empty();
 
         let today = moment({ hour: 0, minute: 0, seconds: 0, milliseconds: 0 });
@@ -159,27 +159,22 @@ window.onload = async () => {
             colDay.add(1, "days");
         }
 
+        let count = 1;
         for (const i in content.rows) {
             const row = content.rows[i];
             if (row.isComplete)
                 continue;
-            // $tr.css("display", "none");
+            count++;
+
             const $ck = $(`<input type='checkbox'/>`);
             $ck.click(() => check(i));
             const $ckdiv = $(`<div>`);
             $ckdiv.append($ck);
             $keys.append($ckdiv);
 
-            const $name = $(`<input type='text'/>`);
-            $name.val(row.text);
-            $name.on('input', () => { row.text = $name.val(); push(); });
-            const $namediv = $(`<div>`);
-            $namediv.append($name);
-            $keys.append($namediv);
-
             const $h = $(`<input type='text'/>`);
             $h.val(row.hour);
-            $h.on('input', () => { row.hour = $h.val(); push(); });
+            $h.on('input', () => row.hour = $h.val());
             const $hdiv = $(`<div>`);
             $hdiv.append($h);
             $keys.append($hdiv);
@@ -208,11 +203,18 @@ window.onload = async () => {
             const $data = $("<div class='newline'></div>");
             $datas.append($data);
         }
+
+        updateText();
+    }
+
+    const updateText = () => {
+        let linenum = content.rows.length + 1;
+        $textdiv.css("grid-row-end", linenum);
+        $text.css("height", linenum * 24.5 + "px");
     }
 
     const check = async (index) => {
         content.rows[index].isComplete = true;
-        await push();
     }
 
     const push = async () => {
