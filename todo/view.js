@@ -18,7 +18,7 @@ window.onload = async () => {
             this.rows = [];
         }
 
-        load(obj) {
+        load = (obj) => {
             this.rows = [];
             for (const ele of obj.rows) {
                 const row = new Row();
@@ -27,7 +27,7 @@ window.onload = async () => {
             }
         }
 
-        equals(other) {
+        equals = (other) => {
             if (this.rows.length != other.rows.length)
                 return false;
 
@@ -35,6 +35,14 @@ window.onload = async () => {
                 if (!this.rows[i].equals(other.rows[i]))
                     return false;
             return true;
+        }
+
+        clone = () => {
+            const content = new Content();
+            for (const row of this.rows) {
+                content.rows.push(row.clone());
+            }
+            return content;
         }
 
         get object() {
@@ -49,7 +57,6 @@ window.onload = async () => {
 
     class Row {
         constructor() {
-            this.isComplete = false;
             this.text = null;
             this.hour = 0;
             this.isNest = false;
@@ -59,22 +66,29 @@ window.onload = async () => {
         }
 
         load = (obj) => {
-            const row = new Row();
-            row.isComplete = obj.isComplete;
-            row.text = obj.text;
-            row.hour = obj.hour;
-            row.isNest = obj.isNest;
+            this.text = obj.text;
+            this.hour = obj.hour;
+            this.isNest = obj.isNest;
         }
 
         equals = (other) =>
-            this.isComplete == other.isComplete
-            && this.text == other.text
+            this.text == other.text
             && this.hour == other.hour
             && this.isNest == other.isNest;
 
+        clone = () => {
+            const row = new Row();
+            row.text = this.text;
+            row.hour = this.hour;
+            row.isNest = this.isNest;
+
+            row.from = this.from != null ? this.from.clone() : null;
+            row.to = this.to != null ? this.to.clone() : null;
+            return row;
+        }
+
         get object() {
             return {
-                isComplete: this.isComplete,
                 text: this.text,
                 hour: this.hour,
                 isNest: this.isNest,
@@ -109,48 +123,68 @@ window.onload = async () => {
             || query.includes("&") && e.altKey == false
             || query.includes(e.key) == false);
 
-    $('html').keydown(async e => {
-        if (_key(e, "o")) {
-            content.rows.push(new Row());
-            await push();
 
-            render();
+    $("html").keydown(async e => {
+        if (_key(e, "%0")
+            || _key(e, "%1")
+            || _key(e, "%2")
+            || _key(e, "%3")
+            || _key(e, "%4")
+            || _key(e, "%5")
+            || _key(e, "%6")
+            || _key(e, "%7")
+            || _key(e, "%8")
+            || _key(e, "%9")
+        ) {
+            let startLine = $text.val().substr(0, $text[0].selectionStart).split("\n").length;
+            let endLine = $text.val().substr(0, $text[0].selectionEnd).split("\n").length;
+            console.log(e.key + " " + startLine + " " + endLine);
+            for (let i = startLine - 1; i < endLine; i++) {
+                content.rows[i].hour = Number(content.rows[i].hour + e.key.replace(/\D/, ""));
+            }
+            e.preventDefault();
             return false;
         }
+        else if (_key(e, "%Delete")) {
+            let startLine = $text.val().substr(0, $text[0].selectionStart).split("\n").length;
+            let endLine = $text.val().substr(0, $text[0].selectionEnd).split("\n").length;
+            console.log(e.key + " " + startLine + " " + endLine);
+            for (let i = startLine - 1; i < endLine; i++) {
+                content.rows[i].hour = 0;
+            }
+            e.preventDefault();
+            return false;
+        }
+
         return true;
     });
 
     const reloadText = () => {
-        let text = "";
+        const texts = [];
         for (const row of content.rows) {
-            if (row.isComplete  == false)
-                text += row.text + "\n";
+            texts.push(row.text);
         }
-        $text.val(text);
+        $text.val(texts.join("\n"));
     }
     reloadText();
-
-    $text.on("input", (e) => {
-        const lines = $text.val().split(/\r?\n/);
-        for (const i in lines)
-            content.rows[i].text = lines[i];
-    });
 
     const render = async () => {
         $days.empty();
         $keys.find("div:not(.text)").remove();
         $datas.empty();
 
+        let linenum = content.rows.length + 1;
+        $textdiv.css("grid-row-end", linenum);
+        $text.css("height", linenum * 24.5 + "px");
+
         let today = moment({ hour: 0, minute: 0, seconds: 0, milliseconds: 0 });
         let rowDay = today.clone();
         let addDay = 0;
         for (let row of content.rows) {
-            if (row.isComplete == false) {
-                row.from = rowDay.clone();
-                addDay = Math.round(row.hour / hpd);
-                rowDay.add(addDay, "days");
-                row.to = rowDay.clone();
-            }
+            row.from = rowDay.clone();
+            addDay = Math.round(row.hour / hpd);
+            rowDay.add(addDay, "days");
+            row.to = rowDay.clone();
         }
         let lastDay = rowDay.clone();
 
@@ -171,12 +205,8 @@ window.onload = async () => {
             colDay.add(1, "days");
         }
 
-        let count = 1;
         for (const i in content.rows) {
             const row = content.rows[i];
-            if (row.isComplete)
-                continue;
-            count++;
 
             const $ck = $(`<input type='checkbox'/>`);
             $ck.click(() => check(i));
@@ -186,7 +216,10 @@ window.onload = async () => {
 
             const $h = $(`<input type='text'/>`);
             $h.val(row.hour);
-            $h.on('input', () => row.hour = $h.val());
+            $h.on('input', () => {
+                let num = Number($h.val());
+                row.hour = Number.isNaN(num) ? 0 : num;
+            });
             const $hdiv = $(`<div>`);
             $hdiv.append($h);
             $keys.append($hdiv);
@@ -215,25 +248,72 @@ window.onload = async () => {
             const $data = $("<div class='newline'></div>");
             $datas.append($data);
         }
-
-        scaleTextarea();
-    }
-
-    const scaleTextarea = () => {
-        let linenum = content.rows.length + 1;
-        $textdiv.css("grid-row-end", linenum);
-        $text.css("height", linenum * 24.5 + "px");
     }
 
     const check = async (index) => {
-        content.rows[index].isComplete = true;
+        content.rows.splice(index, 1);
         reloadText();
-        render();
     }
 
     const push = async () => {
+        console.log(content.object);
         await docRef.set({ "content": content.object, "date": Date.now() });
     }
 
-    render();
+    let now = Date.now();
+    let prevStart = -1;
+    let prevEnd = -1;
+    let prevText = null;
+    let prevSave = null;
+    let prevRender = null;
+    while (true) {
+        if (prevText == null || prevText != $text.val()) {
+            const text = $text.val();
+            const lines = text.split(/\r?\n/);
+
+            if (prevText != null) {
+                let currentStart = $text[0].selectionStart;
+                let currentStartLine = text.substr(0, currentStart).split("\n").length - 1;
+                let prevStartLine = prevText.substr(0, prevStart).split("\n").length - 1;
+                let prevEndLine = prevText.substr(0, prevEnd).split("\n").length - 1;
+
+                if (lines.length != content.rows.length)
+                    if (prevStartLine != prevEndLine) {
+                        for (let i = prevStartLine + 1; i <= prevEndLine; i++)
+                            content.rows.splice(prevStartLine + 1, 1);
+                    } else if (lines.length < content.rows.length) {
+                        if (currentStartLine == prevStartLine) {
+                            content.rows.splice(prevStartLine + 1, 1);
+                        } else {
+                            content.rows.splice(prevStartLine, 1);
+                        }
+                    }
+
+                const addNum = lines.length - content.rows.length;
+                for (let i = 0; i < addNum; i++)
+                    content.rows.splice(prevStartLine + 1, 0, new Row());
+            }
+
+            for (const i in lines)
+                content.rows[i].text = lines[i];
+
+            prevText = text;
+        }
+        prevStart = $text[0].selectionStart;
+        prevEnd = $text[0].selectionEnd;
+
+        if (prevRender == null || content.equals(prevRender) == false) {
+            prevRender = content.clone();
+            render();
+        }
+
+        if (Date.now() - now > 1500) {
+            if (prevSave == null || content.equals(prevSave) == false) {
+                prevSave = content.clone();
+                now = Date.now();
+                push();
+            }
+        }
+        await waitNext();
+    }
 }
