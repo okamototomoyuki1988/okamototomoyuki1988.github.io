@@ -86,6 +86,7 @@ window.onload = async () => {
         }
     }
     await _read();
+    $text.val(content.text);
 
     const _key = (e, query) =>
         false == (query.includes("#") && e.shiftKey == false
