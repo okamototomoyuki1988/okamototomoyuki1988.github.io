@@ -15,42 +15,25 @@ window.onload = async () => {
 
     class Content {
         constructor() {
+            this.text = "";
             this.rows = [];
         }
 
         load = (obj) => {
-            this.rows = [];
-            for (const ele of obj.rows) {
-                const row = new Row();
-                row.load(ele);
-                this.rows.push(row);
-            }
+            this.text = obj.text;
         }
 
-        equals = (other) => {
-            if (this.rows.length != other.rows.length)
-                return false;
-
-            for (const i in this.rows)
-                if (!this.rows[i].equals(other.rows[i]))
-                    return false;
-            return true;
-        }
+        equals = (other) => this.text == other.text;
 
         clone = () => {
             const content = new Content();
-            for (const row of this.rows) {
-                content.rows.push(row.clone());
-            }
+            content.text = this.text;
             return content;
         }
 
         get object() {
             const obj = {};
-            obj.rows = [];
-            for (const row of this.rows) {
-                obj.rows.push(row.object);
-            }
+            obj.text = this.text;
             return obj;
         }
     }
@@ -58,8 +41,6 @@ window.onload = async () => {
     class Row {
         constructor() {
             this.text = null;
-            this.hour = 0;
-            this.isNest = false;
 
             this.from = null;
             this.to = null;
@@ -67,31 +48,20 @@ window.onload = async () => {
 
         load = (obj) => {
             this.text = obj.text;
-            this.hour = obj.hour;
-            this.isNest = obj.isNest;
         }
 
         equals = (other) =>
-            this.text == other.text
-            && this.hour == other.hour
-            && this.isNest == other.isNest;
+            this.text == other.text;
 
         clone = () => {
             const row = new Row();
             row.text = this.text;
-            row.hour = this.hour;
-            row.isNest = this.isNest;
-
-            row.from = this.from != null ? this.from.clone() : null;
-            row.to = this.to != null ? this.to.clone() : null;
             return row;
         }
 
         get object() {
             return {
                 text: this.text,
-                hour: this.hour,
-                isNest: this.isNest,
             };
         }
     }
@@ -125,68 +95,62 @@ window.onload = async () => {
 
 
     $("html").keydown(async e => {
-        if (_key(e, "%0")
-            || _key(e, "%1")
-            || _key(e, "%2")
-            || _key(e, "%3")
-            || _key(e, "%4")
-            || _key(e, "%5")
-            || _key(e, "%6")
-            || _key(e, "%7")
-            || _key(e, "%8")
-            || _key(e, "%9")
-        ) {
-            let startLine = $text.val().substr(0, $text[0].selectionStart).split("\n").length;
-            let endLine = $text.val().substr(0, $text[0].selectionEnd).split("\n").length;
-            console.log(e.key + " " + startLine + " " + endLine);
-            for (let i = startLine - 1; i < endLine; i++) {
-                content.rows[i].hour = Number(content.rows[i].hour + e.key.replace(/\D/, ""));
-            }
-            e.preventDefault();
-            return false;
-        }
-        else if (_key(e, "%Delete")) {
-            let startLine = $text.val().substr(0, $text[0].selectionStart).split("\n").length;
-            let endLine = $text.val().substr(0, $text[0].selectionEnd).split("\n").length;
-            console.log(e.key + " " + startLine + " " + endLine);
-            for (let i = startLine - 1; i < endLine; i++) {
-                content.rows[i].hour = 0;
-            }
-            e.preventDefault();
-            return false;
-        }
+        // if (_key(e, "%0")
+        //     || _key(e, "%1")
+        //     || _key(e, "%2")
+        //     || _key(e, "%3")
+        //     || _key(e, "%4")
+        //     || _key(e, "%5")
+        //     || _key(e, "%6")
+        //     || _key(e, "%7")
+        //     || _key(e, "%8")
+        //     || _key(e, "%9")
+        // ) {
+        //     let startLine = $text.val().substr(0, $text[0].selectionStart).split("\n").length;
+        //     let endLine = $text.val().substr(0, $text[0].selectionEnd).split("\n").length;
+        //     console.log(e.key + " " + startLine + " " + endLine);
+        //     for (let i = startLine - 1; i < endLine; i++) {
+        //         content.rows[i].hour = Number(content.rows[i].hour + e.key.replace(/\D/, ""));
+        //     }
+        //     e.preventDefault();
+        //     return false;
+        // }
 
         return true;
     });
-
-    const reloadText = () => {
-        const texts = [];
-        for (const row of content.rows) {
-            texts.push(row.text);
-        }
-        $text.val(texts.join("\n"));
-    }
-    reloadText();
 
     const render = async () => {
         $days.empty();
         $keys.find("div:not(.text)").remove();
         $datas.empty();
 
+        let today = moment({ hour: 0, minute: 0, seconds: 0, milliseconds: 0 });
+        let rowDay = today.clone();
+        let addDay = 0;
+
+        const lines = content.text.split(/\r?\n/);
+        content.rows = [];
+        for (const line of lines) {
+            const row = new Row();
+            row.text = line;
+            content.rows.push(row);
+        }
+
         let linenum = content.rows.length + 1;
         $textdiv.css("grid-row-end", linenum);
         $text.css("height", linenum * 24.5 + "px");
 
-        let today = moment({ hour: 0, minute: 0, seconds: 0, milliseconds: 0 });
-        let rowDay = today.clone();
-        let addDay = 0;
-        for (let row of content.rows) {
-            row.from = rowDay.clone();
-            addDay = Math.round(row.hour / hpd);
-            rowDay.add(addDay, "days");
-            row.to = rowDay.clone();
+        for (const row of content.rows) {
+            row.from = today.clone().add(addDay, "days");
+
+            const rowNum = row.text.replace(/^.*[\s　]([0-9０-９][\\．]?[0-9０-９]*)$/, "$1")
+            const num = Number(rowNum.replace("．", ".").replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 65248)));
+
+            if (Number.isNaN(num) == false)
+                addDay += num / hpd;
+            row.to = today.clone().add(addDay, "days");
         }
-        let lastDay = rowDay.clone();
+        let lastDay = today.clone().add(addDay, "days").clone();
 
         let colDay = today.clone();
         while (colDay.isSameOrBefore(lastDay)) {
@@ -213,16 +177,6 @@ window.onload = async () => {
             const $ckdiv = $(`<div>`);
             $ckdiv.append($ck);
             $keys.append($ckdiv);
-
-            const $h = $(`<input type='text'/>`);
-            $h.val(row.hour);
-            $h.on('input', () => {
-                let num = Number($h.val());
-                row.hour = Number.isNaN(num) ? 0 : num;
-            });
-            const $hdiv = $(`<div>`);
-            $hdiv.append($h);
-            $keys.append($hdiv);
 
             let tdDay = today.clone();
             while (tdDay.isSameOrBefore(lastDay)) {
@@ -261,46 +215,13 @@ window.onload = async () => {
     }
 
     let now = Date.now();
-    let prevStart = -1;
-    let prevEnd = -1;
-    let prevText = null;
     let prevSave = null;
     let prevRender = null;
     while (true) {
-        if (prevText == null || prevText != $text.val()) {
-            const text = $text.val();
-            const lines = text.split(/\r?\n/);
-
-            if (prevText != null) {
-                let currentStart = $text[0].selectionStart;
-                let currentStartLine = text.substr(0, currentStart).split("\n").length - 1;
-                let prevStartLine = prevText.substr(0, prevStart).split("\n").length - 1;
-                let prevEndLine = prevText.substr(0, prevEnd).split("\n").length - 1;
-
-                if (lines.length != content.rows.length)
-                    if (prevStartLine != prevEndLine) {
-                        for (let i = prevStartLine + 1; i <= prevEndLine; i++)
-                            content.rows.splice(prevStartLine + 1, 1);
-                    } else if (lines.length < content.rows.length) {
-                        if (currentStartLine == prevStartLine) {
-                            content.rows.splice(prevStartLine + 1, 1);
-                        } else {
-                            content.rows.splice(prevStartLine, 1);
-                        }
-                    }
-
-                const addNum = lines.length - content.rows.length;
-                for (let i = 0; i < addNum; i++)
-                    content.rows.splice(prevStartLine + 1, 0, new Row());
-            }
-
-            for (const i in lines)
-                content.rows[i].text = lines[i];
-
-            prevText = text;
+        const text = $text.val();
+        if (content.text == null || content.text != $text.val()) {
+            content.text = text;
         }
-        prevStart = $text[0].selectionStart;
-        prevEnd = $text[0].selectionEnd;
 
         if (prevRender == null || content.equals(prevRender) == false) {
             prevRender = content.clone();
