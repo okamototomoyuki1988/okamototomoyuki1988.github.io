@@ -19,13 +19,13 @@ window.onload = async () => {
             this.rows = [];
         }
 
-        load = (obj) => {
+        load(obj) {
             this.text = obj.text;
         }
 
-        equals = (other) => this.text == other.text;
+        equals(other) { return this.text == other.text; }
 
-        clone = () => {
+        clone() {
             const content = new Content();
             content.text = this.text;
             return content;
@@ -46,14 +46,15 @@ window.onload = async () => {
             this.to = null;
         }
 
-        load = (obj) => {
+        load(obj) {
             this.text = obj.text;
         }
 
-        equals = (other) =>
+        equals(other) {
             this.text == other.text;
+        }
 
-        clone = () => {
+        clone() {
             const row = new Row();
             row.text = this.text;
             return row;
