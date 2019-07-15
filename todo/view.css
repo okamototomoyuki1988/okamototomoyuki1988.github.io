@@ -1,5 +1,6 @@
 :root {
     --cell-height: 24.5px;
+    --cell-width: 25px;
 }
 
 .container {
@@ -10,14 +11,11 @@
     grid-template-rows: var(--cell-height) 1fr;
 }
 
-.container>div {
-    overflow: hidden;
-}
-
 .blank, .keys {
     display: grid;
     grid-template-columns: 30px 1fr;
     grid-auto-rows: var(--cell-height);
+    overflow: hidden;
 }
 
 .keys .text {
@@ -35,8 +33,8 @@
     overflow: hidden;
 }
 
-.days div, .datas div {
-    flex-basis: 25px;
+.days div {
+    flex-basis: var(--cell-width);
     flex-shrink: 0;
     height: 100%;
 }
@@ -47,17 +45,23 @@
 
 .datas {
     display: flex;
-    flex-flow: row wrap;
+    flex-flow: column nowrap;
+    width: 100%;
+    height: 100%;
     overflow: scroll;
 }
 
-.datas div:not(.newline) {
+.datas .row {
+    display: flex;
+    flex-flow: row nowrap;
     height: var(--cell-height);
+    overflow: visible;
 }
 
-.datas .newline {
-    flex-basis: 100%;
+.datas .row div {
+    flex-basis: var(--cell-width);
     flex-shrink: 0;
+    height: var(--cell-height);
 }
 
 textarea {

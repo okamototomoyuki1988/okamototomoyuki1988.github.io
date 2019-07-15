@@ -74,6 +74,11 @@ window.onload = async () => {
     const $text = $("textarea");
     const $textdiv = $("div.text");
 
+    $datas.scroll(e => {
+        $keys.scrollTop($datas.scrollTop());
+        $days.scrollLeft($datas.scrollLeft());
+    });
+
     let content = null;
 
     const res = await fetch('https://holidays-jp.github.io/api/v1/date.json');
@@ -180,10 +185,13 @@ window.onload = async () => {
             $ckdiv.append($ck);
             $keys.append($ckdiv);
 
+            const $rowdiv = $(`<div class="row">`);
+            $datas.append($rowdiv);
+
             let tdDay = today.clone();
             while (tdDay.isSameOrBefore(lastDay)) {
                 const $data = $("<div>");
-                $datas.append($data);
+                $rowdiv.append($data);
                 if (tdDay.isSameOrAfter(row.from) && tdDay.isSameOrBefore(row.to))
                     $data.html("●");
                 else
@@ -200,9 +208,6 @@ window.onload = async () => {
                 $data.css("background-color", color);
                 tdDay.add(1, "days");
             }
-
-            const $data = $("<div class='newline'></div>");
-            $datas.append($data);
         }
     }
 
