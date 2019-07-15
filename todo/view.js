@@ -145,7 +145,7 @@ window.onload = async () => {
 
         let linenum = content.rows.length + 1;
         $textdiv.css("grid-row-end", linenum);
-        $text.css("height", linenum * 24.5 + "px");
+        $text.css("height", linenum * 1.5 + "em");
 
         for (const row of content.rows) {
             row.from = today.clone().add(addDay, "days");
