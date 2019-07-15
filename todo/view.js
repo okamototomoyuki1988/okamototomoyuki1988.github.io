@@ -132,7 +132,6 @@ window.onload = async () => {
         $datas.empty();
 
         let today = moment({ hour: 0, minute: 0, seconds: 0, milliseconds: 0 });
-        let rowDay = today.clone();
         let addDay = 0;
 
         const lines = content.text.split(/\r?\n/);
@@ -150,7 +149,7 @@ window.onload = async () => {
         for (const row of content.rows) {
             row.from = today.clone().add(addDay, "days");
 
-            const rowNum = row.text.replace(/^.*[\s　]([0-9０-９][\\．]?[0-9０-９]*)$/, "$1")
+            const rowNum = row.text.replace(/^.*[\s　]([0-9０-９]+[\.．]?[0-9０-９]*)$/, "$1")
             const num = Number(rowNum.replace("．", ".").replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 65248)));
 
             if (Number.isNaN(num) == false)
