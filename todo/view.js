@@ -211,8 +211,9 @@ window.onload = async () => {
     }
 
     const check = async (index) => {
-        content.rows.splice(index, 1);
-        reloadText();
+        const lines = $text.val().split('\n');
+        lines.splice(index, 1);
+        $text.val(lines.join('\n'));
     }
 
     const push = async () => {
