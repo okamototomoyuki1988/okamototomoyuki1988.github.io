@@ -16,24 +16,36 @@ window.onload = async () => {
     class Content {
         constructor() {
             this.text = "";
+            this.workWeek = true;
+            this.workHoli = false;
             this.rows = [];
         }
 
         load(obj) {
             this.text = obj.text;
+            this.workWeek = obj.workWeek === true ? true : false;
+            this.workHoli = obj.workHoli === true ? true : false;
         }
 
-        equals(other) { return this.text == other.text; }
+        equals(other) {
+            return this.text == other.text
+                && this.workWeek == other.workWeek
+                && this.workHoli == other.workHoli;
+        }
 
         clone() {
             const content = new Content();
             content.text = this.text;
+            content.workWeek = this.workWeek;
+            content.workHoli = this.workHoli;
             return content;
         }
 
         get object() {
             const obj = {};
             obj.text = this.text;
+            obj.workWeek = this.workWeek;
+            obj.workHoli = this.workHoli;
             return obj;
         }
     }
@@ -51,18 +63,22 @@ window.onload = async () => {
         }
 
         equals(other) {
-            this.text == other.text;
+            return this.text == other.text;
         }
 
         clone() {
             const row = new Row();
             row.text = this.text;
+            row.workWeek = this.workWeek;
+            row.workHoli = this.workHoli;
             return row;
         }
 
         get object() {
             return {
                 text: this.text,
+                workWeek: this.workWeek,
+                workHoli: this.workHoli,
             };
         }
     }
@@ -73,6 +89,9 @@ window.onload = async () => {
 
     const $text = $("textarea");
     const $textdiv = $("div.text");
+
+    const $workWeek = $(".wk-w");
+    const $workHoli = $(".wk-h");
 
     $datas.scroll(e => {
         $keys.scrollTop($datas.scrollTop());
@@ -93,6 +112,8 @@ window.onload = async () => {
     }
     await _read();
     $text.val(content.text);
+    $workWeek.prop("checked", content.workWeek);
+    $workHoli.prop("checked", content.workHoli);
 
     const _key = (e, query) =>
         false == (query.includes("#") && e.shiftKey == false
@@ -126,6 +147,10 @@ window.onload = async () => {
         return true;
     });
 
+    const isHoli = mnt => {
+        return mnt.day() === 0 || mnt.day() === 6 || holidayDic.hasOwnProperty(mnt.format("YYYY-MM-DD"));
+    }
+
     const render = async () => {
         $days.empty();
         $keys.find("div:not(.text)").remove();
@@ -149,11 +174,26 @@ window.onload = async () => {
         for (const row of content.rows) {
             row.from = today.clone().add(addDay, "days");
 
-            const rowNum = row.text.replace(/^.*[\s　]([0-9０-９]+[\.．]?[0-9０-９]*)$/, "$1")
-            const num = Number(rowNum.replace("．", ".").replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 65248)));
+            if (content.workWeek || content.workHoli) {
+                const rowNum = row.text.replace(/^.*[\s　]([0-9０-９]+[\.．]?[0-9０-９]*)$/, "$1")
+                const num = Number(rowNum.replace("．", ".").replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 65248)));
 
-            if (Number.isNaN(num) == false)
-                addDay += num / hpd;
+                if (Number.isNaN(num) == false) {
+                    let taskDay = num / hpd;
+                    while (taskDay > 0) {
+                        const wk = today.clone().add(addDay, "days");
+                        if (content.workWeek === false && isHoli(wk) === false) {
+                            addDay++;
+                        } else if (content.workHoli === false && isHoli(wk)) {
+                            addDay++;
+                        } else {
+                            const add = Math.min(taskDay, 1);
+                            taskDay -= add;
+                            addDay += add;
+                        }
+                    }
+                }
+            }
             row.to = today.clone().add(addDay, "days");
         }
         let lastDay = today.clone().add(addDay, "days").clone();
@@ -164,7 +204,7 @@ window.onload = async () => {
             $day.text(colDay.format("DD"));
             $days.append($day);
             let color = null;
-            if (colDay.day() == 0 || colDay.day() == 6 || holidayDic[colDay.format("YYYY-MM-DD")])
+            if (isHoli(colDay))
                 color = "#A6A";
             else if (colDay.day() % 2 == 0)
                 color = "#442";
@@ -197,7 +237,7 @@ window.onload = async () => {
                     $data.html("&nbsp;");
 
                 let color = null;
-                if (tdDay.day() == 0 || tdDay.day() == 6 || holidayDic[tdDay.format("YYYY-MM-DD")])
+                if (isHoli(tdDay))
                     color = i % 2 == 0 ? "#ede" : "#dcd";
                 else if (tdDay.day() % 2 == 0)
                     color = i % 2 == 0 ? "#eed" : "#ddc";
@@ -210,7 +250,7 @@ window.onload = async () => {
         }
     }
 
-    const check = async (index) => {
+    const check = async index => {
         const lines = $text.val().split('\n');
         lines.splice(index, 1);
         $text.val(lines.join('\n'));
@@ -225,10 +265,9 @@ window.onload = async () => {
     let prevSave = null;
     let prevRender = null;
     while (true) {
-        const text = $text.val();
-        if (content.text == null || content.text != $text.val()) {
-            content.text = text;
-        }
+        content.text = $text.val();
+        content.workWeek = $workWeek.prop("checked");
+        content.workHoli = $workHoli.prop("checked");
 
         if (prevRender == null || content.equals(prevRender) == false) {
             prevRender = content.clone();

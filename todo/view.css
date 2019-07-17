@@ -8,7 +8,17 @@
     width: 100%;
     height: 100%;
     grid-template-columns: 300px 1fr;
-    grid-template-rows: var(--cell-height) 1fr;
+    grid-template-rows: var(--cell-height) var(--cell-height) 1fr;
+}
+
+.header {
+    grid-column: 1 / 3;
+    grid-row: 1 / 2;
+    display: block;
+    width: 100%;
+    height: 100%;
+
+    text-align: right;
 }
 
 .blank, .keys {
@@ -64,7 +74,7 @@
     height: var(--cell-height);
 }
 
-textarea {
+.keys textarea {
     resize: none;
     width: 100%;
     height: 100%;
@@ -72,7 +82,7 @@ textarea {
     font-size: 1.35em;
 }
 
-input {
+.keys input {
     width: 95%;
     height: 95%;
 }
