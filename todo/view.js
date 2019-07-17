@@ -16,19 +16,22 @@ window.onload = async () => {
     class Content {
         constructor() {
             this.text = "";
+            this.hpd = 6;
             this.workWeek = true;
             this.workHoli = false;
             this.rows = [];
         }
 
         load(obj) {
-            this.text = obj.text;
+            this.text = obj.text !== undefined ? obj.text : this.text;
+            this.hpd = obj.hpd !== undefined ? obj.hpd : this.hpd;
             this.workWeek = obj.workWeek === true ? true : false;
             this.workHoli = obj.workHoli === true ? true : false;
         }
 
         equals(other) {
             return this.text == other.text
+                && this.hpd == other.hpd
                 && this.workWeek == other.workWeek
                 && this.workHoli == other.workHoli;
         }
@@ -36,6 +39,7 @@ window.onload = async () => {
         clone() {
             const content = new Content();
             content.text = this.text;
+            content.hpd = this.hpd;
             content.workWeek = this.workWeek;
             content.workHoli = this.workHoli;
             return content;
@@ -44,6 +48,7 @@ window.onload = async () => {
         get object() {
             const obj = {};
             obj.text = this.text;
+            obj.hpd = this.hpd;
             obj.workWeek = this.workWeek;
             obj.workHoli = this.workHoli;
             return obj;
@@ -86,6 +91,7 @@ window.onload = async () => {
     const $days = $(".days");
     const $keys = $(".keys");
     const $datas = $(".datas");
+    const $hpd = $(".hpd");
 
     const $text = $("textarea");
     const $textdiv = $("div.text");
@@ -112,6 +118,7 @@ window.onload = async () => {
     }
     await _read();
     $text.val(content.text);
+    $hpd.val(content.hpd);
     $workWeek.prop("checked", content.workWeek);
     $workHoli.prop("checked", content.workHoli);
 
@@ -179,7 +186,7 @@ window.onload = async () => {
                 const num = Number(rowNum.replace("．", ".").replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 65248)));
 
                 if (Number.isNaN(num) == false) {
-                    let taskDay = num / hpd;
+                    let taskDay = num / content.hpd;
                     while (taskDay > 0) {
                         const wk = today.clone().add(addDay, "days");
                         if (content.workWeek === false && isHoli(wk) === false) {
@@ -266,6 +273,11 @@ window.onload = async () => {
     let prevRender = null;
     while (true) {
         content.text = $text.val();
+        content.hpd = Number($hpd.val());
+        if (content.hpd < 1) {
+            $hpd.val(1);
+            content.hpd = 1;
+        }
         content.workWeek = $workWeek.prop("checked");
         content.workHoli = $workHoli.prop("checked");
 
