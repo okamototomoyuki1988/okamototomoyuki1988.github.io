@@ -59,6 +59,7 @@ window.onload = async () => {
         constructor() {
             this.text = null;
 
+            this.isHour = false;
             this.from = null;
             this.to = null;
         }
@@ -74,16 +75,12 @@ window.onload = async () => {
         clone() {
             const row = new Row();
             row.text = this.text;
-            row.workWeek = this.workWeek;
-            row.workHoli = this.workHoli;
             return row;
         }
 
         get object() {
             return {
                 text: this.text,
-                workWeek: this.workWeek,
-                workHoli: this.workHoli,
             };
         }
     }
@@ -184,8 +181,9 @@ window.onload = async () => {
             if (content.workWeek || content.workHoli) {
                 const rowNum = row.text.replace(/^.*[\s　]([0-9０-９]+[\.．]?[0-9０-９]*)$/, "$1")
                 const num = Number(rowNum.replace("．", ".").replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 65248)));
+                if (Number.isNaN(num) == false && num !== 0) {
+                    row.isHour = true;
 
-                if (Number.isNaN(num) == false) {
                     let taskDay = num / content.hpd;
                     while (taskDay > 0) {
                         const wk = today.clone().add(addDay, "days");
@@ -239,9 +237,8 @@ window.onload = async () => {
                 const $data = $("<div>");
                 $rowdiv.append($data);
                 if (tdDay.isSameOrAfter(row.from) && tdDay.isSameOrBefore(row.to))
-                    $data.html("●");
-                else
-                    $data.html("&nbsp;");
+                    if (row.isHour)
+                        $data.html("●");
 
                 let color = null;
                 if (isHoli(tdDay))
