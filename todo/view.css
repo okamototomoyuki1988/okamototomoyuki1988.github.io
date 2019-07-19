@@ -8,7 +8,7 @@
     width: 100%;
     height: 100%;
     grid-template-columns: 300px 1fr;
-    grid-template-rows: var(--cell-height) var(--cell-height) 1fr;
+    grid-template-rows: var(--cell-height) calc(var(--cell-height) * 2) 1fr;
 }
 
 .header {
@@ -39,16 +39,20 @@
 
 .days {
     display: flex;
-    overflow: hidden;
+    flex-flow: column nowrap;
+    overflow-x: hidden;
+    overflow-y: scroll;
 }
 
-.days div {
+.days .month, .days .day {
+    display: flex;
+    flex-flow: row nowrap;
+}
+
+.month div, .days div {
     flex-basis: var(--cell-width);
     flex-shrink: 0;
     height: 100%;
-}
-
-.days div {
     color: #fff;
 }
 
@@ -90,6 +94,7 @@ div {
     text-align: center;
     vertical-align: middle;
     line-height: var(--cell-height);
+    box-sizing: border-box;
 }
 
 input.hpd {

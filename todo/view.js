@@ -86,6 +86,8 @@ window.onload = async () => {
     }
 
     const $days = $(".days");
+    const $daysM = $(".days .month");
+    const $daysD = $(".days .day");
     const $keys = $(".keys");
     const $datas = $(".datas");
     const $hpd = $(".hpd");
@@ -156,7 +158,8 @@ window.onload = async () => {
     }
 
     const render = async () => {
-        $days.empty();
+        $daysD.empty();
+        $daysM.empty();
         $keys.find("div:not(.text)").remove();
         $datas.empty();
 
@@ -205,9 +208,18 @@ window.onload = async () => {
 
         let colDay = today.clone();
         while (colDay.isSameOrBefore(lastDay)) {
+            const $month = $("<div>");
             const $day = $("<div>");
+
+            let m = colDay.format("M");
+            if (colDay.date() === 1) {
+                $month.text(m);
+                $month.css("border-left", "solid #AAA");
+                $day.css("border-left", "solid #AAA");
+            }
+            $daysM.append($month);
             $day.text(colDay.format("DD"));
-            $days.append($day);
+            $daysD.append($day);
             let color = null;
             if (isHoli(colDay))
                 color = "#A6A";
@@ -216,6 +228,7 @@ window.onload = async () => {
             else
                 color = "#244";
 
+            $month.css("background-color", color);
             $day.css("background-color", color);
             colDay.add(1, "days");
         }
@@ -240,6 +253,9 @@ window.onload = async () => {
                     if (row.isHour)
                         $data.html("●");
 
+                if (tdDay.date() === 1) {
+                    $data.css("border-left", "solid #AAA");
+                }
                 let color = null;
                 if (isHoli(tdDay))
                     color = i % 2 == 0 ? "#ede" : "#dcd";
