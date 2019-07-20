@@ -207,12 +207,14 @@ window.onload = async () => {
         let lastDay = today.clone().add(addDay, "days").clone();
 
         let colDay = today.clone();
+        let prevM = null;
         while (colDay.isSameOrBefore(lastDay)) {
             const $month = $("<div>");
             const $day = $("<div>");
 
             let m = colDay.format("M");
-            if (colDay.date() === 1) {
+            if (prevM !== m) {
+                prevM = m;
                 $month.text(m);
                 $month.css("border-left", "solid #AAA");
                 $day.css("border-left", "solid #AAA");
@@ -245,6 +247,7 @@ window.onload = async () => {
             const $rowdiv = $(`<div class="row">`);
             $datas.append($rowdiv);
 
+            prevM = null;
             let tdDay = today.clone();
             while (tdDay.isSameOrBefore(lastDay)) {
                 const $data = $("<div>");
@@ -253,7 +256,9 @@ window.onload = async () => {
                     if (row.isHour)
                         $data.html("●");
 
-                if (tdDay.date() === 1) {
+                let m = tdDay.format("M");
+                if (prevM !== m) {
+                    prevM = m;
                     $data.css("border-left", "solid #AAA");
                 }
                 let color = null;
