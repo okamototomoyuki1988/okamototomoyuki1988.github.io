@@ -263,13 +263,16 @@ window.onload = async () => {
                 }
                 let color = null;
                 if (isHoli(tdDay))
-                    color = i % 2 == 0 ? "#ede" : "#dcd";
+                    color = chroma("#ede");
                 else if (tdDay.day() % 2 == 0)
-                    color = i % 2 == 0 ? "#eed" : "#ddc";
+                    color = chroma("#eed");
                 else
-                    color = i % 2 == 0 ? "#dee" : "#cdd";
+                    color = chroma("#dee");
 
-                $data.css("background-color", color);
+                if (i % 2 == 0)
+                    color = color.mix('#88F', 0.125);
+
+                $data.css("background-color", color.css());
                 tdDay.add(1, "days");
             }
         }
