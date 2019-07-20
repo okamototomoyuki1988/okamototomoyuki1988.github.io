@@ -3,12 +3,9 @@ window.onload = async () => {
     const url = new URL(location.href);
     const params = url.searchParams;
     const pId = params.get("id");
-    const pHpd = params.get("hpd");
 
     if (pId === null)
         throw new Error("パラメータを入力してください。");
-
-    const hpd = pHpd != null ? Number(pHpd) : 6;
 
     const db = firebase.firestore();
     const docRef = db.collection(FS_COL).doc(pId);
