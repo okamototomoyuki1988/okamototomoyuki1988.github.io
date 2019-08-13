@@ -63,7 +63,7 @@ window.onload = async () => {
     const docRef = db.collection(FS_COL).doc(pId);
 
 
-    const $text = $("textarea");
+    const $text = $(".text");
 
     const content = new Content()
     const _read = async () => {
@@ -76,7 +76,7 @@ window.onload = async () => {
         }
     }
     await _read();
-    $text.val(content.notes[0].text);
+    $text.html(content.notes[0].text);
 
     const _key = (e, query) =>
         false == (query.includes("#") && e.shiftKey == false
@@ -118,7 +118,7 @@ window.onload = async () => {
     let now = Date.now();
     let prevSave = null;
     while (true) {
-        content.notes[0].text = $text.val();
+        content.notes[0].text = $text.html();
 
         if (Date.now() - now > 1500) {
             if (prevSave == null || deepEquals(content, prevSave) == false) {
