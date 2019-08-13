@@ -1,0 +1,48 @@
+<html>
+
+<head>
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/6.3.5/firebase-app.js"></script>
+
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#config-web-app -->
+    <script src="https://www.gstatic.com/firebasejs/6.3.5/firebase-firestore.js"></script>
+
+    <script>
+        // Your web app's Firebase configuration
+        var firebaseConfig = {
+            apiKey: "AIzaSyCwQsSxjN8cwrj4oKLWVyx4FmHxtlKb_z0",
+            authDomain: "todo-abc60.firebaseapp.com",
+            databaseURL: "https://todo-abc60.firebaseio.com",
+            projectId: "todo-abc60",
+            storageBucket: "todo-abc60.appspot.com",
+            messagingSenderId: "856197355352",
+            appId: "1:856197355352:web:2b23768d02c232a9"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"
+        integrity="sha256-4iQZ6BVL4qNKlQ27TExEhBN1HFPvAvAMbFavKKosSWQ=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha256-pasqAKBDmFT4eHoN2ndd6lN370kFiGUFyTiUHWhU7k8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.0.4/chroma.min.js"
+        integrity="sha256-r2i+bPjselDztQN4Z4P9MvibdQaw/AVKp37mJx9BeZo=" crossorigin="anonymous"></script>
+    <script src="./lib.js"></script>
+    <script src="./script.js"></script>
+
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <div contenteditable="false"></div>
+        </div>
+        <div class="body">
+            <textarea></textarea>
+        </div>
+    </div>
+</body>
+
+</html>
