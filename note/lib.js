@@ -13,8 +13,25 @@ const waitWhile = pred => new Promise(resolve => {
 const removeFuncDeep = arg => {
     if (typeof arg == "object")
         for (let key in arg)
-            if (arg[key] == "function")
-                delete arg[key];
+            if (arg[key] === null)
+                continue;
+            else {
+                switch (arg[key].constructor.name) {
+                    case "String":
+                    case "Number":
+                    case "Boolean":
+                        break;
+                    case "Function":
+                        delete arg[key];
+                        break;
+                    case "Array":
+                        arg[key] = removeFuncDeep(Object.assign([], arg[key]));
+                        break;
+                    default:
+                        arg[key] = removeFuncDeep(Object.assign({}, arg[key]));
+                        break;
+                }
+            }
     return arg;
 }
 const deepEquals = (variable1, variable2) => {

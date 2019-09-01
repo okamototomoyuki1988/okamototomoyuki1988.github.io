@@ -4,31 +4,30 @@ const SPAN = 500;
 class Content {
     constructor() {
         this.notes = [];
+        this.date = 0;
     }
 
-    load(obj) {
-        for (const src of obj.notes) {
+    load(json) {
+        this.notes.length = 0;
+        for (const src of json.notes) {
             const note = new Note();
             note.load(src);
             this.notes.push(note);
         }
+        this.date = json.date;
     }
 
     clone() {
         const clone = new Content();
         for (const note of this.notes) {
-            clone.notes.push(note.clone);
+            clone.notes.push(note.clone());
         }
+        clone.date = this.date;
         return clone;
     }
 
     get object() {
-        const obj = {};
-        obj.notes = [];
-        for (const ele of this.notes) {
-            obj.notes.push(ele.object);
-        }
-        return obj;
+        return removeFuncDeep(Object.assign({}, this));
     }
 }
 
@@ -58,25 +57,14 @@ window.onload = async () => {
 
     if (pId === null)
         throw new Error("パラメータを入力してください。");
+    const $text = $(".text");
 
     const db = firebase.firestore();
     const docRef = db.collection(FS_COL).doc(pId);
 
-
-    const $text = $(".text");
-
-    const content = new Content()
-    const _read = async () => {
-        let doc = await docRef.get();
-        if (doc.exists)
-            content.load(doc.data().content);
-        else {
-            content.notes.push(new Note());
-            content.notes[0].text = "";
-        }
-    }
-    await _read();
-    $text.html(content.notes[0].text);
+    let content = new Content();
+    content.notes.push(new Note());
+    content.notes[0].text = "";
 
     const _key = (e, query) =>
         false == (query.includes("#") && e.shiftKey == false
@@ -110,21 +98,42 @@ window.onload = async () => {
         return true;
     });
 
+    const _read = doc => {
+        if (doc.exists) {
+            if (doc.data().date > content.date) {
+                console.log("rec:" + JSON.stringify(doc.data()));
+                content.load(doc.data());
+                $text.html(content.notes[0].text);
+            }
+        }
+    }
+    docRef.onSnapshot(doc => {
+        _read(doc);
+    });
+
+    let doc = await docRef.get();
+    _read(doc);
+
     const push = async () => {
-        console.log(content.object);
-        await docRef.set({ "content": content.object, "date": Date.now() });
+        const obj = removeFuncDeep(Object.assign({}, content));
+        console.log("send:" + JSON.stringify(obj));
+        await docRef.set(obj);
     }
 
-    let now = Date.now();
-    let prevSave = null;
+    let syncTime = Date.now();
     while (true) {
-        content.notes[0].text = $text.html();
+        const text = $text.html();
+        if (content.notes[0].text !== text) {
+            content.isDirty = true;
+            content.date = Date.now();
+            content.notes[0].text = text;
+        }
 
-        if (Date.now() - now > 1500) {
-            if (prevSave == null || deepEquals(content, prevSave) == false) {
-                prevSave = content.clone();
-                now = Date.now();
-                push();
+        if (content.isDirty && (Date.now() - syncTime) > 1500) {
+            if (content.isDirty) {
+                syncTime = Date.now();
+                content.isDirty = false;
+                await push();
             }
         }
         await waitNext();
