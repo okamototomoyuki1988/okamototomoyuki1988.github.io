@@ -120,6 +120,8 @@ window.onload = async () => {
         await docRef.set(obj);
     }
 
+    $text.removeClass("loading");
+
     let syncTime = Date.now();
     while (true) {
         const text = $text.html();
