@@ -57,7 +57,7 @@ window.onload = async () => {
 
     if (pId === null)
         throw new Error("パラメータを入力してください。");
-    const $text = $(".text");
+    const $text = $("textarea");
 
     const db = firebase.firestore();
     const docRef = db.collection(FS_COL).doc(pId);
@@ -103,7 +103,7 @@ window.onload = async () => {
             if (doc.data().date > content.date) {
                 console.log("rec:" + JSON.stringify(doc.data()));
                 content.load(doc.data());
-                $text.html(content.notes[0].text);
+                $text.val(content.notes[0].text);
             }
         }
     }
@@ -124,7 +124,7 @@ window.onload = async () => {
 
     let syncTime = Date.now();
     while (true) {
-        const text = $text.html();
+        const text = $text.val();
         if (content.notes[0].text !== text) {
             content.isDirty = true;
             content.date = Date.now();
